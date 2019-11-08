@@ -28,7 +28,8 @@ class ConvBN(tf.keras.Model):
 
 
 
-def linear_lr(global_step,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
+def linear_lr(data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
+  global global_step
   x=list(range(0,epochs+1,round(epochs*(1/repeat))))
   x= x + [epochs] if x[-1]!=epochs else x
   
@@ -67,7 +68,8 @@ def linear_lr(global_step,data_len,batch_size,epochs,mode,peak_lr,repeat,interpo
   return lr_func
 
 @timer
-def deep_learn(model, opt, loss, train, test,global_step):
+def deep_learn(model, opt, loss, train, test):
+  global global_step
   train_loss = test_loss = train_correct = test_correct  = 0.0
   tf.keras.backend.set_learning_phase(1)
   
