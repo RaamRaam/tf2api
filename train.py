@@ -28,7 +28,7 @@ class ConvBN(tf.keras.Model):
 
 
 
-def linear_lr(global_step,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
+def linear_lr(global_step,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate,global_step):
   x=list(range(0,epochs+1,round(epochs*(1/repeat))))
   x= x + [epochs] if x[-1]!=epochs else x
   
