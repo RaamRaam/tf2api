@@ -12,7 +12,7 @@ from google.colab import drive
 
 # import libraries
 from .libraries import *
-from .globals import *
+# from .globals import *
 from .tfrecords import *
 # from .augment import *
 from .train import *
