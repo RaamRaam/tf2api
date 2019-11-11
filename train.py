@@ -65,9 +65,10 @@ class train(object):
     self.train_ds=hparams['TRAIN_DS']
     self.test_ds=hparams['TEST_DS']
 
-
+    self.start_epoch=0
     self.epochs=hparams['EPOCHS']
     self.batch_size=hparams['BATCH_SIZE']
+    self.global_step = tf.Variable(-1)
 
     self.lr_peak=hparams['LR_PEAK']
     self.lr_repeat=hparams['LR_REPEAT']
@@ -75,6 +76,7 @@ class train(object):
     self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
     self.lr_mode=hparams['LR_MODE']
     self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
+    self.optimizer=tf.keras.optimizers.SGD(self.lr)
 
     self.log_path=hparams['LOG_PATH']
     self.train_log=self.log_path+'/train_log'
@@ -82,16 +84,14 @@ class train(object):
     self.train_summary_writer = tf.summary.create_file_writer(self.train_log)
     self.test_summary_writer = tf.summary.create_file_writer(self.test_log)
 
-    self.global_step = tf.Variable(-1)
 
-    self.optimizer=tf.keras.optimizers.SGD(self.lr)
 
   def call(self):
     tf.keras.backend.set_floatx('float16')
     test_ds_batches = self.test_ds.ds.shuffle(self.batch_size).batch(self.batch_size).prefetch(self.batch_size)
     print('training....')
     t = time.time()
-    for epoch in range(self.epochs):
+    for epoch in range(self.start_epoch,self.start_epoch+self.epochs):
       train_ds_batches = self.train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
       learnings=self.deep_learn(self.model, self.optimizer, None, train_ds_batches, test_ds_batches)
       lr=self.optimizer.learning_rate*self.batch_size
@@ -110,7 +110,7 @@ class train(object):
       with self.test_summary_writer.as_default():
         tf.summary.scalar('loss', val_loss, step=epoch)
         tf.summary.scalar('accuracy', val_acc, step=epoch)
-
+    self.start_epoch=epoch  
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
     # global global_step
