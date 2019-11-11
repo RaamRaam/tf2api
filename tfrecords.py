@@ -16,6 +16,8 @@ def _bytes_feature(value):
 def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
+type_map={'int' : (_int64_feature,tf.int64),'float' : (_float_feature,tf.float32),'str' : (_bytes_feature,tf.string),'list' : (_bytes_feature,tf.string),'numpy.uint8' : (_int64_feature,tf.int64),'numpy.float32' : (_float_feature,tf.float32),'numpy.float64' : (_float_feature,tf.float64),'numpy.ndarray' : (_bytes_feature,tf.string)}
+
 @timer
 def SaveTFRecordSet(path,data_dict):
     batch_size=len(data_dict[list(data_dict.keys())[0]])
@@ -63,7 +65,7 @@ class ds(object):
         self.ds=None
         self.length=0
         self.columns=[]
-        self.type_map={'int' : (_int64_feature,tf.int64),'float' : (_float_feature,tf.float32),'str' : (_bytes_feature,tf.string),'list' : (_bytes_feature,tf.string),'numpy.uint8' : (_int64_feature,tf.int64),'numpy.float32' : (_float_feature,tf.float32),'numpy.float64' : (_float_feature,tf.float64),'numpy.ndarray' : (_bytes_feature,tf.string)}
+        
 
     
 
@@ -106,7 +108,7 @@ class ds(object):
                 content_dict[col+'_d']=tf.io.FixedLenFeature([], tf.int64)
             elif coltype=='list':
                 content_dict[col+'_l']=tf.io.FixedLenFeature([], tf.int64)
-            content_dict[col]=tf.io.FixedLenFeature([], self.type_map[coltype][1])
+            content_dict[col]=tf.io.FixedLenFeature([], type_map[coltype][1])
         tfds=tf.data.TFRecordDataset(tf.data.Dataset.list_files(tffilelist),num_parallel_reads=parallelize)              
         # for i in tfds:
         #   parser(i,content_dict,[header['cols'],header['coltypes']])
