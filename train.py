@@ -86,7 +86,7 @@ class train(object):
 
     self.optimizer=tf.keras.optimizers.SGD(self.lr)
 
-  def call(self,)  
+  def call(self)  
     tf.keras.backend.set_floatx('float16')
     test_ds_batches = test_ds.ds.shuffle(self.batch_size).batch(self.batch_size).prefetch(self.batch_size)
     print('training....')
