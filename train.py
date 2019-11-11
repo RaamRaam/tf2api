@@ -63,7 +63,7 @@ class train(object):
     self.name=hparams['NAME']
     self.model=hparams['MODEL']
     self.train_ds=hparams['TRAIN_DS']
-    self.train_ds=hparams['TEST_DS']
+    self.test_ds=hparams['TEST_DS']
 
 
     self.epochs=hparams['EPOCHS']
