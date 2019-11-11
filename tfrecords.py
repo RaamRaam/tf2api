@@ -47,7 +47,7 @@ def SaveTFRecordSet(path,data_dict):
                     content_dict[col+'_l']=_int64_feature(list_to_array.shape[0])
                     transformed_value = list_to_array.tostring()
                 # print(col,coltype)
-                content_dict[col]=self.type_map[coltype][0](transformed_value)
+                content_dict[col]=type_map[coltype][0](transformed_value)
                 example = tf.train.Example(features=tf.train.Features(feature=content_dict))
             writer.write(example.SerializeToString())
     return
