@@ -69,7 +69,7 @@ class ds(object):
 
     
 
-    def _parser(record,content_dict,head):
+    def __parser(self,record,content_dict,head):
         parsed = tf.io.parse_single_example(record, content_dict)
         for (col,coltype) in zip(head[0],head[1]):
             if 'int' in coltype:
@@ -113,7 +113,7 @@ class ds(object):
         # for i in tfds:
         #   parser(i,content_dict,[header['cols'],header['coltypes']])
         #   break
-        self.ds=tfds.map(lambda record:self._parser(record,content_dict,[header['cols'],header['coltypes']]),num_parallel_calls=parallelize)
+        self.ds=tfds.map(lambda record:self.__parser(record,content_dict,[header['cols'],header['coltypes']]),num_parallel_calls=parallelize)
         list_ds=list(self.ds)
         self.length=len(list_ds)
         self.columns=list_ds[0].keys()
