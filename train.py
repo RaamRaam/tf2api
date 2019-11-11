@@ -160,7 +160,7 @@ class train(object):
 
   @tf.function
   def do_model(self,data):
-    return model(data)
+    return self.model(data)
   @timer
   def deep_learn(self,model, opt, loss, train, test):
     # global global_step
