@@ -101,16 +101,18 @@ class train(object):
       val_loss=learnings[1][0]/self.test_ds.length
       val_acc=learnings[1][1]/self.test_ds.length
       time_taken=time.time() - t
-      print("epoch: %0.3d \t lr:%0.2f \t train loss:%0.2f \t train acc:%2.2f \t  val loss:%0.2f \t val acc:%2.2f \t time:%0.2f" % (epoch ,lr,train_loss,train_acc*100,val_loss,val_acc*100,time_taken))
+      print("epoch: %0.3d \t lr:%0.2f \t train loss:%0.2f \t train acc:%2.2f \t  val loss:%0.2f \t val acc:%2.2f \t time:%0.2f" % (epoch+1,lr,train_loss,train_acc*100,val_loss,val_acc*100,time_taken))
 
       with self.train_summary_writer.as_default():
-        tf.summary.scalar('loss', train_loss, step=epoch)
-        tf.summary.scalar('accuracy', train_acc, step=epoch)
+        tf.summary.scalar('loss', train_loss, step=epoch+1)
+        tf.summary.scalar('accuracy', train_acc, step=epoch+1)
+        tf.summary.scalar('epochs', self.epochs, step=epoch+1)
+        tf.summary.scalar('batch_size', self.batch_size, step=epoch+1)
         # tf.summary.scalar('LR', lr, step=epoch)
       with self.test_summary_writer.as_default():
-        tf.summary.scalar('loss', val_loss, step=epoch)
-        tf.summary.scalar('accuracy', val_acc, step=epoch)
-    self.start_epoch=epoch  
+        tf.summary.scalar('loss', val_loss, step=epoch+1)
+        tf.summary.scalar('accuracy', val_acc, step=epoch+1)
+    self.start_epoch=epoch+1  
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
     # global global_step
@@ -170,6 +172,8 @@ class train(object):
       correct = tf.reduce_sum(tf.cast(tf.math.equal(tf.cast(tf.argmax(predictions, axis = 1),tf.int32), labels), tf.float32))
       train_loss += loss.numpy()
       train_correct += correct.numpy()
+      with self.train_summary_writer.as_default():
+        tf.summary.scalar('LR', opt.learning_rate, step=self.global_step)
     train_metrics=(train_loss,train_correct)
     
     
