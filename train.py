@@ -70,7 +70,7 @@ class train(object):
     self.batch_size=hparams['BATCH_SIZE']
     self.global_step = tf.Variable(0)
     self.global_step_reminder = 0
-
+    self.trace=True
 
     self.lr_peak=hparams['LR_PEAK']
     self.lr_repeat=hparams['LR_REPEAT']
@@ -174,11 +174,11 @@ class train(object):
         data=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
         predictions = self.do_model(data)
-        if trace:
+        if self.trace:
           with self.train_summary_writer.as_default():        
             tf.summary.trace_export(name='Architecture',step=0) #,profiler_outdir=self.train_log)
           tf.summary.trace_off()
-          trace=False
+          self.trace=False
         loss = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=predictions,labels=labels))
       grads = tape.gradient(loss, model.trainable_variables)
       self.global_step.assign_add(1)
