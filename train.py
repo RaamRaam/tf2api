@@ -65,7 +65,8 @@ class train(object):
     test_ds_batches = self.test_ds.ds.shuffle(self.batch_size).batch(self.batch_size).prefetch(self.batch_size)
     print('training....')
     t = time.time()
-    tf.summary.trace_on(graph=True, profiler=False)
+    if self.trace:
+      tf.summary.trace_on(graph=True, profiler=False)
     for epoch in range(self.start_epoch,self.start_epoch+self.epochs):
       train_ds_batches = self.train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
       learnings=self.deep_learn(self.model, self.optimizer, None, train_ds_batches, test_ds_batches)
@@ -150,7 +151,7 @@ class train(object):
             tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
           tf.summary.trace_off()
           self.trace=False
-        loss = tf.reduce_sum(self.lossfunction(logits=predictions,labels=labels))
+        loss = tf.reduce_sum(self.lossfunction(labels,predictions))
       grads = tape.gradient(loss, model.trainable_variables)
       self.global_step.assign_add(1)
       opt.apply_gradients(zip(grads, model.trainable_variables))
@@ -169,7 +170,7 @@ class train(object):
       data=tf.cast(x['features'],tf.float16)
       labels=tf.cast(x['lables'],tf.int32)
       predictions = model(data)
-      loss = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=predictions,labels=labels))
+      loss = tf.reduce_sum(self.lossfunction(labels,predictions))
       correct = tf.reduce_sum(tf.cast(tf.math.equal(tf.cast(tf.argmax(predictions, axis = 1),tf.int32), labels), tf.float32))
       test_loss += loss.numpy()
       test_correct += correct.numpy()
