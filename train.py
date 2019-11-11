@@ -28,35 +28,6 @@ class ConvBN(tf.keras.Model):
     return tf.nn.relu(self.bn(self.conv(inputs)))
 
 
-# class RamNet(tf.keras.Model):
-#   def __init__(self):
-#     super().__init__()
-#     pool = tf.keras.layers.MaxPooling2D()
-#     self.conv1 = tf2x.ConvBN(10)
-#     self.conv2 = tf2x.ConvBN(10)
-#     self.maxpool1 = tf.keras.layers.MaxPooling2D()
-#     self.conv3 = tf2x.ConvBN(10)
-#     self.conv4 = tf2x.ConvBN(10)
-#     self.maxpool2 = tf.keras.layers.MaxPooling2D()
-#     self.conv5 = tf2x.ConvBN(10)
-#     self.conv6 = tf2x.ConvBN(10)
-#     self.avgpool = tf.keras.layers.GlobalAvgPool2D()
-    
-#   # @tf.function(input_signature=[tf.TensorSpec(shape=(None,28,28,1), dtype=tf.float16)])
-#   # @tf.function
-#   def call(self, x):
-#     with tf.name_scope('block'):
-#       h=self.conv1(x) #28x28
-#       h=self.conv2(h) #28x28
-#       h=self.maxpool1(h) #14x14
-#       h=self.conv3(h) #14x14
-#       h=self.conv4(h) #14x14
-#       h=self.maxpool2(h) #7x7
-#       h=self.conv5(h) #7x7
-#       # h=self.conv6(h) #7x7
-#       h=self.avgpool(h)
-#     return h
-
 
 class train(object):
   def __init__(self, hparams):
@@ -78,7 +49,8 @@ class train(object):
     self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
     self.lr_mode=hparams['LR_MODE']
     self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
-    self.optimizer=tf.keras.optimizers.SGD(self.lr)
+    self.optimizer=hparams['OPTIMIZER'](self.lr)
+    self.lossfunction=hparams['LOSSFUNCTION']
 
     self.log_path=hparams['LOG_PATH']
     self.train_log=self.log_path+'/train_log'
@@ -178,7 +150,7 @@ class train(object):
             tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
           tf.summary.trace_off()
           self.trace=False
-        loss = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=predictions,labels=labels))
+        loss = tf.reduce_sum(self.lossfunction(logits=predictions,labels=labels))
       grads = tape.gradient(loss, model.trainable_variables)
       self.global_step.assign_add(1)
       opt.apply_gradients(zip(grads, model.trainable_variables))
