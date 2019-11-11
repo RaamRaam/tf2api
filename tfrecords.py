@@ -9,26 +9,25 @@ import time
 import concurrent.futures
 import json
 
+def _int64_feature(value):
+  return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+def _bytes_feature(value):
+  return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+def _float_feature(value):
+    return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 
 
-class ds():
+class ds(object):
 
 
     def __init__(self):
         self.ds=None
         self.length=0
         self.columns=[]
+        self.type_map={'int' : (_int64_feature,tf.int64),'float' : (_float_feature,tf.float32),'str' : (_bytes_feature,tf.string),'list' : (_bytes_feature,tf.string),'numpy.uint8' : (_int64_feature,tf.int64),'numpy.float32' : (_float_feature,tf.float32),'numpy.float64' : (_float_feature,tf.float64),'numpy.ndarray' : (_bytes_feature,tf.string)}
 
-    def _int64_feature(value):
-      return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
-    def _bytes_feature(value):
-      return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
-    def _float_feature(value):
-        return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
-
-    self.type_map={'int' : (_int64_feature,tf.int64),'float' : (_float_feature,tf.float32),'str' : (_bytes_feature,tf.string),'list' : (_bytes_feature,tf.string),
-    'numpy.uint8' : (_int64_feature,tf.int64),'numpy.float32' : (_float_feature,tf.float32),'numpy.float64' : (_float_feature,tf.float64),'numpy.ndarray' : (_bytes_feature,tf.string)}
+    
 
     def _parser(record,content_dict,head):
         parsed = tf.io.parse_single_example(record, content_dict)
