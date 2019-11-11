@@ -65,6 +65,7 @@ class train(object):
     test_ds_batches = self.test_ds.ds.shuffle(self.batch_size).batch(self.batch_size).prefetch(self.batch_size)
     print('training....')
     t = time.time()
+    tf.summary.trace_on(graph=True, profiler=False)
     for epoch in range(self.start_epoch,self.start_epoch+self.epochs):
       train_ds_batches = self.train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
       learnings=self.deep_learn(self.model, self.optimizer, None, train_ds_batches, test_ds_batches)
@@ -138,8 +139,7 @@ class train(object):
   def deep_learn(self,model, opt, loss, train, test):
     train_loss = test_loss = train_correct = test_correct  = 0.0
     tf.keras.backend.set_learning_phase(1)
-    tf.summary.trace_on(graph=True, profiler=False)
-    trace=True
+    
     for x in tqdm(train):
       with tf.GradientTape() as tape:
         data=tf.cast(x['features'],tf.float16)
