@@ -13,7 +13,7 @@ import json
 
 
 
-class TFRecords():
+class ds():
 
     def __init__(self):
         self.ds=None
@@ -30,38 +30,10 @@ class TFRecords():
 
     def _int64_feature(value):
       return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
-
     def _bytes_feature(value):
       return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
-
-
     def _float_feature(value):
         return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
-
-    @timer
-    def ReadTFRecordSet(self,tffilelist,parallelize):
-        with open('/'.join(tffilelist[0].split('/')[:-1])+'/'+tffilelist[0].split('/')[-1].split('.')[0]+'.json') as json_file:
-            header = json.load(json_file)
-        content_dict={}
-        for (col,coltype) in zip(header['cols'],header['coltypes']):
-            if coltype=='numpy.ndarray':
-                content_dict[col+'_h']=tf.io.FixedLenFeature([], tf.int64)
-                content_dict[col+'_w']=tf.io.FixedLenFeature([], tf.int64)
-                content_dict[col+'_d']=tf.io.FixedLenFeature([], tf.int64)
-            elif coltype=='list':
-                content_dict[col+'_l']=tf.io.FixedLenFeature([], tf.int64)
-            content_dict[col]=tf.io.FixedLenFeature([], self.type_map[coltype][1])
-        tfds=tf.data.TFRecordDataset(tf.data.Dataset.list_files(tffilelist),num_parallel_reads=parallelize)              
-        # for i in tfds:
-        #   parser(i,content_dict,[header['cols'],header['coltypes']])
-        #   break
-        self.ds=tfds.map(lambda record:_parser(record,content_dict,[header['cols'],header['coltypes']]),num_parallel_calls=parallelize)
-        list_ds=list(self.ds)
-        self.length=len(list_ds)
-        self.columns=list_ds[0].keys()
-        return
-        # return {'ds':ds,'len':len(list_ds), 'keys':list_ds[0].keys()}
-
     def _parser(record,content_dict,head):
         parsed = tf.io.parse_single_example(record, content_dict)
         for (col,coltype) in zip(head[0],head[1]):
@@ -88,6 +60,30 @@ class TFRecords():
                 del parsed[col]
                 parsed[col]=test1
         return parsed
+
+    @timer
+    def ReadTFRecordSet(self,tffilelist,parallelize):
+        with open('/'.join(tffilelist[0].split('/')[:-1])+'/'+tffilelist[0].split('/')[-1].split('.')[0]+'.json') as json_file:
+            header = json.load(json_file)
+        content_dict={}
+        for (col,coltype) in zip(header['cols'],header['coltypes']):
+            if coltype=='numpy.ndarray':
+                content_dict[col+'_h']=tf.io.FixedLenFeature([], tf.int64)
+                content_dict[col+'_w']=tf.io.FixedLenFeature([], tf.int64)
+                content_dict[col+'_d']=tf.io.FixedLenFeature([], tf.int64)
+            elif coltype=='list':
+                content_dict[col+'_l']=tf.io.FixedLenFeature([], tf.int64)
+            content_dict[col]=tf.io.FixedLenFeature([], self.type_map[coltype][1])
+        tfds=tf.data.TFRecordDataset(tf.data.Dataset.list_files(tffilelist),num_parallel_reads=parallelize)              
+        # for i in tfds:
+        #   parser(i,content_dict,[header['cols'],header['coltypes']])
+        #   break
+        self.ds=tfds.map(lambda record:_parser(record,content_dict,[header['cols'],header['coltypes']]),num_parallel_calls=parallelize)
+        list_ds=list(self.ds)
+        self.length=len(list_ds)
+        self.columns=list_ds[0].keys()
+        return
+        # return {'ds':ds,'len':len(list_ds), 'keys':list_ds[0].keys()}
     @timer
     def FilterTFRecordSet(tffile,col,filterlist):
         self.ds=tffile['ds'].filter(lambda y: tf.reduce_any(tf.math.equal(int(y[col]),filterlist)))
