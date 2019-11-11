@@ -79,8 +79,8 @@ class train(object):
     self.log_path=hparams['LOG_PATH']
     self.train_log=self.log_path+'/train_log'
     self.test_log=self.log_path+'/test_log'
-    self.train_summary_writer = tf.summary.create_file_writer(train_log)
-    self.test_summary_writer = tf.summary.create_file_writer(test_log)
+    self.train_summary_writer = tf.summary.create_file_writer(self.train_log)
+    self.test_summary_writer = tf.summary.create_file_writer(self.test_log)
 
     self.global_step = tf.Variable(-1)
 
