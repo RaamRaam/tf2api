@@ -166,7 +166,7 @@ class train(object):
     # global global_step
     train_loss = test_loss = train_correct = test_correct  = 0.0
     tf.keras.backend.set_learning_phase(1)
-    tf.summary.trace_on()
+    tf.summary.trace_on(graph=True, profiler=True)
     for x in tqdm(train):
       with tf.GradientTape() as tape:
         data=tf.cast(x['features'],tf.float16)
@@ -184,7 +184,7 @@ class train(object):
         tf.summary.scalar('LR', opt.learning_rate, step=self.global_step_reminder+self.global_step.numpy())
 
     with self.train_summary_writer.as_default():        
-      tf.summary.trace_export(name='Architecture'step=0,profiler_outdir=self.train_log)
+      tf.summary.trace_export(name='Architecture',step=0,profiler_outdir=self.train_log)
     train_metrics=(train_loss,train_correct)
     
     
