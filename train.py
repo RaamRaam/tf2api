@@ -146,9 +146,9 @@ class train(object):
     batches_per_epoch = data_len//batch_size + 1
 
     if interpolate:
-      lr_func = lambda: lr_schedule(global_step/batches_per_epoch)/batch_size
+      lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/batch_size
     else:
-      lr_func = lambda: lr_schedule(math.ceiling(global_step/batches_per_epoch))/batch_size
+      lr_func = lambda: lr_schedule(math.ceiling(self.global_step/batches_per_epoch))/batch_size
     return lr_func
 
   @timer
