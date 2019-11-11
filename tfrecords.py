@@ -120,9 +120,10 @@ class ds(object):
         return
         # return {'ds':ds,'len':len(list_ds), 'keys':list_ds[0].keys()}
     @timer
-    def FilterTFRecordSet(tffile,col,filterlist):
-        self.ds=tffile['ds'].filter(lambda y: tf.reduce_any(tf.math.equal(int(y[col]),filterlist)))
-        list_ds=list(self.ds)
+    def FilterTFRecordSet(self,col,filterlist):
+        ds=self.ds.filter(lambda y: tf.reduce_any(tf.math.equal(int(y[col]),filterlist)))
+        list_ds=list(ds)
+        self.ds=ds
         self.length=len(list_ds)
         self.columns=list_ds[0].keys()
         return
