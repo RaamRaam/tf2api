@@ -103,11 +103,11 @@ class train(object):
       time_taken=time.time() - t
       print("epoch: %0.3d \t lr:%0.2f \t train loss:%0.2f \t train acc:%2.2f \t  val loss:%0.2f \t val acc:%2.2f \t time:%0.2f" % (epoch ,lr,train_loss,train_acc*100,val_loss,val_acc*100,time_taken))
 
-      with train_summary_writer.as_default():
+      with self.train_summary_writer.as_default():
         tf.summary.scalar('loss', train_loss, step=epoch)
         tf.summary.scalar('accuracy', train_acc, step=epoch)
         # tf.summary.scalar('LR', lr, step=epoch)
-      with test_summary_writer.as_default():
+      with self.test_summary_writer.as_default():
         tf.summary.scalar('loss', val_loss, step=epoch)
         tf.summary.scalar('accuracy', val_acc, step=epoch)
 
