@@ -157,6 +157,10 @@ class train(object):
       lr_func = lambda: lr_schedule(math.ceiling(self.global_step/batches_per_epoch))/batch_size
     return lr_func
 
+
+  @tf.function
+  def do_model(self,data):
+    return model(data)
   @timer
   def deep_learn(self,model, opt, loss, train, test):
     # global global_step
@@ -167,7 +171,8 @@ class train(object):
       with tf.GradientTape() as tape:
         data=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        predictions = model(data)
+        tf.summary.trace_on()
+        predictions = self.do_model(data)
         loss = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=predictions,labels=labels))
       grads = tape.gradient(loss, model.trainable_variables)
       self.global_step.assign_add(1)
@@ -178,6 +183,9 @@ class train(object):
       train_correct += correct.numpy()
       with self.train_summary_writer.as_default():
         tf.summary.scalar('LR', opt.learning_rate, step=self.global_step_reminder+self.global_step.numpy())
+
+    with self.train_summary_writer.as_default():        
+      tf.summary.trace_export()
     train_metrics=(train_loss,train_correct)
     
     
