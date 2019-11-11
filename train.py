@@ -59,7 +59,7 @@ class RamNet(tf.keras.Model):
 
 
 class train(object):
-  def __init__(self, hparam):
+  def __init__(self, hparams):
     self.name=hparams['NAME']
     self.model=hparams['MODEL']
     self.train_ds=hparams['TRAIN_DS']
