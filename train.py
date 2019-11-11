@@ -88,11 +88,11 @@ class train(object):
 
   def call(self):
     tf.keras.backend.set_floatx('float16')
-    test_ds_batches = test_ds.ds.shuffle(self.batch_size).batch(self.batch_size).prefetch(self.batch_size)
+    test_ds_batches = self.test_ds.ds.shuffle(self.batch_size).batch(self.batch_size).prefetch(self.batch_size)
     print('training....')
     t = time.time()
     for epoch in range(self.epochs):
-      train_ds_batches = train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
+      train_ds_batches = self.train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
       learnings=self.deep_learn(self.model, self.optimizer, None, train_ds_batches, test_ds_batches)
       lr=opt.learning_rate*self.batch_size
       train_loss=learnings[0][0]/self.train_ds.length
