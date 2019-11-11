@@ -184,7 +184,7 @@ class train(object):
         tf.summary.scalar('LR', opt.learning_rate, step=self.global_step_reminder+self.global_step.numpy())
 
     with self.train_summary_writer.as_default():        
-      tf.summary.trace_export(name='Architecture')
+      tf.summary.trace_export(name='Architecture'step=0,profiler_outdir=self.train_log)
     train_metrics=(train_loss,train_correct)
     
     
