@@ -93,7 +93,7 @@ class train(object):
     t = time.time()
     for epoch in range(self.epochs):
       train_ds_batches = train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
-      learnings=self.deep_learn(self.model, opt, None, train_ds_batches, test_ds_batches)
+      learnings=self.deep_learn(self.model, self.optimizer, None, train_ds_batches, test_ds_batches)
       lr=opt.learning_rate*self.batch_size
       train_loss=learnings[0][0]/self.train_ds.length
       train_acc=learnings[0][1]/self.train_ds.length
