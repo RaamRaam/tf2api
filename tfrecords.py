@@ -10,53 +10,8 @@ import concurrent.futures
 import json
 
 
-type_map={'int' : (_int64_feature,tf.int64),
-          'float' : (_float_feature,tf.float32),
-          'str' : (_bytes_feature,tf.string),
-          'list' : (_bytes_feature,tf.string),
-          'numpy.uint8' : (_int64_feature,tf.int64),
-          'numpy.float32' : (_float_feature,tf.float32),
-          'numpy.float64' : (_float_feature,tf.float64),
-          'numpy.ndarray' : (_bytes_feature,tf.string)}
 
 
-@timer
-def SaveTFRecordSet(path,data_dict):
-    batch_size=len(data_dict[list(data_dict.keys())[0]])
-    header = {}
-    header['cols']=list(data_dict.keys())
-    header['coltypes']=[str(j).replace('\'>','').replace('<class \'','')  for j in [type(data_dict[i][0]) for i in data_dict.keys()]]
-    with open('/'.join(path.split('/')[:-1])+'/'+path.split('/')[-1].split('.')[0]+'.json', 'w') as outfile:
-        json.dump(header, outfile)
-
-    with tf.io.TFRecordWriter(path) as writer:
-        for index in range(batch_size):
-            content_dict={}
-            for (col,coltype) in zip(header['cols'],header['coltypes']):
-                if 'int' in coltype:
-                    transformed_value=int(data_dict[col][index])
-                elif 'float' in coltype:
-                    transformed_value=data_dict[col][index]
-                elif coltype=='str':
-                    transformed_value=bytes(data_dict[col][index].strip(),'utf-8')
-                elif coltype=='numpy.ndarray':
-                    content_dict[col+'_h']=_int64_feature(data_dict[col][index].shape[0])
-                    content_dict[col+'_w']=_int64_feature(data_dict[col][index].shape[1])
-                    content_dict[col+'_d']=_int64_feature(data_dict[col][index].shape[2])
-                    transformed_value = data_dict[col][index].tostring()
-                elif coltype=='list':
-                    list_to_array=np.asarray(data_dict[col][index])
-                    content_dict[col+'_l']=_int64_feature(list_to_array.shape[0])
-                    transformed_value = list_to_array.tostring()
-                # print(col,coltype)
-                content_dict[col]=type_map[coltype][0](transformed_value)
-                example = tf.train.Example(features=tf.train.Features(feature=content_dict))
-            writer.write(example.SerializeToString())
-    return
-
-def create_classfile(path,class_names):
-  with open(path, 'w') as f:
-    f.writelines([i+'\n' for i in class_names])
 
 class TFRecords():
 
@@ -64,6 +19,14 @@ class TFRecords():
         self.ds=None
         self.length=0
         self.columns=[]
+        self.type_map={'int' : (_int64_feature,tf.int64),
+                  'float' : (_float_feature,tf.float32),
+                  'str' : (_bytes_feature,tf.string),
+                  'list' : (_bytes_feature,tf.string),
+                  'numpy.uint8' : (_int64_feature,tf.int64),
+                  'numpy.float32' : (_float_feature,tf.float32),
+                  'numpy.float64' : (_float_feature,tf.float64),
+                  'numpy.ndarray' : (_bytes_feature,tf.string)}
 
     def _int64_feature(value):
       return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
@@ -87,7 +50,7 @@ class TFRecords():
                 content_dict[col+'_d']=tf.io.FixedLenFeature([], tf.int64)
             elif coltype=='list':
                 content_dict[col+'_l']=tf.io.FixedLenFeature([], tf.int64)
-            content_dict[col]=tf.io.FixedLenFeature([], type_map[coltype][1])
+            content_dict[col]=tf.io.FixedLenFeature([], self.type_map[coltype][1])
         tfds=tf.data.TFRecordDataset(tf.data.Dataset.list_files(tffilelist),num_parallel_reads=parallelize)              
         # for i in tfds:
         #   parser(i,content_dict,[header['cols'],header['coltypes']])
@@ -133,3 +96,40 @@ class TFRecords():
         self.columns=list_ds[0].keys()
         return
 
+    @timer
+    def SaveTFRecordSet(path,data_dict):
+        batch_size=len(data_dict[list(data_dict.keys())[0]])
+        header = {}
+        header['cols']=list(data_dict.keys())
+        header['coltypes']=[str(j).replace('\'>','').replace('<class \'','')  for j in [type(data_dict[i][0]) for i in data_dict.keys()]]
+        with open('/'.join(path.split('/')[:-1])+'/'+path.split('/')[-1].split('.')[0]+'.json', 'w') as outfile:
+            json.dump(header, outfile)
+
+        with tf.io.TFRecordWriter(path) as writer:
+            for index in range(batch_size):
+                content_dict={}
+                for (col,coltype) in zip(header['cols'],header['coltypes']):
+                    if 'int' in coltype:
+                        transformed_value=int(data_dict[col][index])
+                    elif 'float' in coltype:
+                        transformed_value=data_dict[col][index]
+                    elif coltype=='str':
+                        transformed_value=bytes(data_dict[col][index].strip(),'utf-8')
+                    elif coltype=='numpy.ndarray':
+                        content_dict[col+'_h']=_int64_feature(data_dict[col][index].shape[0])
+                        content_dict[col+'_w']=_int64_feature(data_dict[col][index].shape[1])
+                        content_dict[col+'_d']=_int64_feature(data_dict[col][index].shape[2])
+                        transformed_value = data_dict[col][index].tostring()
+                    elif coltype=='list':
+                        list_to_array=np.asarray(data_dict[col][index])
+                        content_dict[col+'_l']=_int64_feature(list_to_array.shape[0])
+                        transformed_value = list_to_array.tostring()
+                    # print(col,coltype)
+                    content_dict[col]=self.type_map[coltype][0](transformed_value)
+                    example = tf.train.Example(features=tf.train.Features(feature=content_dict))
+                writer.write(example.SerializeToString())
+        return
+
+    def create_classfile(path,class_names):
+      with open(path, 'w') as f:
+        f.writelines([i+'\n' for i in class_names])
