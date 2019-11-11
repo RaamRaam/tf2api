@@ -166,7 +166,7 @@ class train(object):
   def deep_learn(self,model, opt, loss, train, test):
     train_loss = test_loss = train_correct = test_correct  = 0.0
     tf.keras.backend.set_learning_phase(1)
-    tf.summary.trace_on(graph=True, profiler=True)
+    tf.summary.trace_on(graph=True, profiler=False)
     trace=True
     for x in tqdm(train):
       with tf.GradientTape() as tape:
@@ -175,7 +175,7 @@ class train(object):
         predictions = self.do_model(data)
         if self.trace:
           with self.train_summary_writer.as_default():        
-            tf.summary.trace_export(name='Architecture',step=0,profiler_outdir=self.train_log)
+            tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
           tf.summary.trace_off()
           self.trace=False
         loss = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=predictions,labels=labels))
