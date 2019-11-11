@@ -68,7 +68,8 @@ class train(object):
     self.start_epoch=0
     self.epochs=hparams['EPOCHS']
     self.batch_size=hparams['BATCH_SIZE']
-    self.global_step = tf.Variable(-1)
+    self.global_step = tf.Variable(0)
+
 
     self.lr_peak=hparams['LR_PEAK']
     self.lr_repeat=hparams['LR_REPEAT']
@@ -113,9 +114,9 @@ class train(object):
         tf.summary.scalar('loss', val_loss, step=epoch+1)
         tf.summary.scalar('accuracy', val_acc, step=epoch+1)
     self.start_epoch=epoch+1  
+    self.global_step = tf.Variable(0)
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
-    # global global_step
     x=list(range(0,epochs+1,round(epochs*(1/repeat))))
     x= x + [epochs] if x[-1]!=epochs else x
     
