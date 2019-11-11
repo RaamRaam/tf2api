@@ -173,7 +173,7 @@ class train(object):
       train_loss += loss.numpy()
       train_correct += correct.numpy()
       with self.train_summary_writer.as_default():
-        tf.summary.scalar('LR', opt.learning_rate, step=self.global_step)
+        tf.summary.scalar('LR', opt.learning_rate, step=self.global_step.numpy())
     train_metrics=(train_loss,train_correct)
     
     
