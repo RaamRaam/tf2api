@@ -167,7 +167,7 @@ class train(object):
         loss = tf.reduce_sum(self.lossfunction(labels,predictions))
       grads = tape.gradient(loss, model.trainable_variables)
       self.global_step.assign_add(1)
-      opt.apply_gradients(zip(grads, model.trainable_variables))
+      opt.apply_gradients(zip(grads, model.trainable_weights))
       
       correct = tf.reduce_sum(tf.cast(tf.math.equal(tf.cast(tf.argmax(predictions, axis = 1),tf.int32), labels), tf.float32))
       train_loss += loss.numpy()
