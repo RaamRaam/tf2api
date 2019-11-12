@@ -136,10 +136,6 @@ class train(object):
     return lr_func
 
 
-  # @tf.function
-  def do_model(self,data):
-    return self.model(data)
-
   @timer
   def deep_learn(self,model, opt, loss, train, test):
     train_loss = test_loss = train_correct = test_correct  = 0.0
@@ -149,13 +145,13 @@ class train(object):
       with tf.GradientTape() as tape:
         data=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        predictions = self.do_model(data)
+        predictions = self.model(data)
         if self.trace:
           with self.train_summary_writer.as_default():        
             tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
           tf.summary.trace_off()
           self.trace=False
-        loss = tf.reduce_sum(self.lossfunction(logits=predictions,labels=labels))
+        loss = tf.reduce_sum(self.lossfunction(labels,predictions))
       grads = tape.gradient(loss, model.trainable_variables)
       self.global_step.assign_add(1)
       opt.apply_gradients(zip(grads, model.trainable_variables))
@@ -174,10 +170,50 @@ class train(object):
       data=tf.cast(x['features'],tf.float16)
       labels=tf.cast(x['lables'],tf.int32)
       predictions = model(data)
-      loss = tf.reduce_sum(self.lossfunction(logits=predictions,labels=labels))
+      loss = tf.reduce_sum(self.lossfunction(labels,predictions))
       correct = tf.reduce_sum(tf.cast(tf.math.equal(tf.cast(tf.argmax(predictions, axis = 1),tf.int32), labels), tf.float32))
       test_loss += loss.numpy()
       test_correct += correct.numpy()
     test_metrics=(test_loss,test_correct)
     return (train_metrics,test_metrics)
 
+  # @timer
+  # def deep_learn(self,model, opt, loss, train, test):
+  #   train_loss = test_loss = train_correct = test_correct  = 0.0
+  #   tf.keras.backend.set_learning_phase(1)
+    
+  #   for x in tqdm(train):
+  #     with tf.GradientTape() as tape:
+  #       data=tf.cast(x['features'],tf.float16)
+  #       labels=tf.cast(x['lables'],tf.int32)
+  #       predictions = self.model(data)
+  #       if self.trace:
+  #         with self.train_summary_writer.as_default():        
+  #           tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
+  #         tf.summary.trace_off()
+  #         self.trace=False
+  #       loss = tf.reduce_sum(self.lossfunction(logits=predictions,labels=labels))
+  #     grads = tape.gradient(loss, model.trainable_variables)
+  #     self.global_step.assign_add(1)
+  #     opt.apply_gradients(zip(grads, model.trainable_variables))
+      
+  #     correct = tf.reduce_sum(tf.cast(tf.math.equal(tf.cast(tf.argmax(predictions, axis = 1),tf.int32), labels), tf.float32))
+  #     train_loss += loss.numpy()
+  #     train_correct += correct.numpy()
+  #     with self.train_summary_writer.as_default():
+  #       tf.summary.scalar('LR', opt.learning_rate, step=self.global_step_reminder+self.global_step.numpy())
+
+  #   train_metrics=(train_loss,train_correct)
+    
+    
+  #   tf.keras.backend.set_learning_phase(0)
+  #   for x in test:
+  #     data=tf.cast(x['features'],tf.float16)
+  #     labels=tf.cast(x['lables'],tf.int32)
+  #     predictions = model(data)
+  #     loss = tf.reduce_sum(self.lossfunction(logits=predictions,labels=labels))
+  #     correct = tf.reduce_sum(tf.cast(tf.math.equal(tf.cast(tf.argmax(predictions, axis = 1),tf.int32), labels), tf.float32))
+  #     test_loss += loss.numpy()
+  #     test_correct += correct.numpy()
+  #   test_metrics=(test_loss,test_correct)
+  #   return (train_metrics,test_metrics)
