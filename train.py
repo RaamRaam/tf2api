@@ -32,6 +32,10 @@ class ConvBN(tf.keras.Model):
 class train(object):
   def __init__(self, hparams):
 
+    self.name=hparams['NAME']
+    self.model=hparams['MODEL']
+    self.train_ds=hparams['TRAIN_DS']
+    self.test_ds=hparams['TEST_DS']
 
     self.trace=True
     self.global_step = tf.Variable(0)
@@ -56,10 +60,6 @@ class train(object):
     self.optimizer=hparams['OPTIMIZER'](self.lr)
     self.lossfunction=hparams['LOSSFUNCTION']
 
-    self.name=hparams['NAME']
-    self.model=hparams['MODEL']
-    self.train_ds=hparams['TRAIN_DS']
-    self.test_ds=hparams['TEST_DS']
 
 
   def call(self):
