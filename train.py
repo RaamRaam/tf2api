@@ -39,9 +39,12 @@ class train(object):
     self.start_epoch=0
     self.epochs=hparams['EPOCHS']
     self.batch_size=hparams['BATCH_SIZE']
-    self.global_step = tf.Variable(0)
     self.global_step_reminder = 0
+    self.optimizer=hparams['OPTIMIZER'](self.lr)
+    self.lossfunction=hparams['LOSSFUNCTION']
+
     self.trace=True
+    self.global_step = tf.Variable(0)
 
     self.lr_peak=hparams['LR_PEAK']
     self.lr_repeat=hparams['LR_REPEAT']
@@ -49,8 +52,6 @@ class train(object):
     self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
     self.lr_mode=hparams['LR_MODE']
     self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
-    self.optimizer=hparams['OPTIMIZER'](self.lr)
-    self.lossfunction=hparams['LOSSFUNCTION']
 
     self.log_path=hparams['LOG_PATH']
     self.train_log=self.log_path+'/train_log'
@@ -132,7 +133,7 @@ class train(object):
     return lr_func
 
 
-  @tf.function
+  # @tf.function
   def do_model(self,data):
     return self.model(data)
 
@@ -151,7 +152,7 @@ class train(object):
             tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
           tf.summary.trace_off()
           self.trace=False
-        loss = tf.reduce_sum(self.lossfunction(labels,predictions))
+        loss = tf.reduce_sum(self.lossfunction(logits=predictions,labels=labels))
       grads = tape.gradient(loss, model.trainable_variables)
       self.global_step.assign_add(1)
       opt.apply_gradients(zip(grads, model.trainable_variables))
@@ -170,7 +171,7 @@ class train(object):
       data=tf.cast(x['features'],tf.float16)
       labels=tf.cast(x['lables'],tf.int32)
       predictions = model(data)
-      loss = tf.reduce_sum(self.lossfunction(labels,predictions))
+      loss = tf.reduce_sum(self.lossfunction(logits=predictions,labels=labels))
       correct = tf.reduce_sum(tf.cast(tf.math.equal(tf.cast(tf.argmax(predictions, axis = 1),tf.int32), labels), tf.float32))
       test_loss += loss.numpy()
       test_correct += correct.numpy()
