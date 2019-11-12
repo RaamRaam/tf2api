@@ -31,17 +31,7 @@ class ConvBN(tf.keras.Model):
 
 class train(object):
   def __init__(self, hparams):
-    self.name=hparams['NAME']
-    self.model=hparams['MODEL']
-    self.train_ds=hparams['TRAIN_DS']
-    self.test_ds=hparams['TEST_DS']
 
-    self.start_epoch=0
-    self.epochs=hparams['EPOCHS']
-    self.batch_size=hparams['BATCH_SIZE']
-    self.global_step_reminder = 0
-    self.optimizer=hparams['OPTIMIZER'](self.lr)
-    self.lossfunction=hparams['LOSSFUNCTION']
 
     self.trace=True
     self.global_step = tf.Variable(0)
@@ -59,6 +49,17 @@ class train(object):
     self.train_summary_writer = tf.summary.create_file_writer(self.train_log)
     self.test_summary_writer = tf.summary.create_file_writer(self.test_log)
 
+    self.start_epoch=0
+    self.epochs=hparams['EPOCHS']
+    self.batch_size=hparams['BATCH_SIZE']
+    self.global_step_reminder = 0
+    self.optimizer=hparams['OPTIMIZER'](self.lr)
+    self.lossfunction=hparams['LOSSFUNCTION']
+
+    self.name=hparams['NAME']
+    self.model=hparams['MODEL']
+    self.train_ds=hparams['TRAIN_DS']
+    self.test_ds=hparams['TEST_DS']
 
 
   def call(self):
