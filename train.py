@@ -4,6 +4,8 @@ from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPool2D, GlobalMax
 from tqdm import tqdm_notebook as tqdm
 import math
 import datetime,time
+from tensorflow import keras
+from tensorflow.keras import layers
 
 tf.keras.backend.set_floatx('float16')
 
@@ -140,13 +142,22 @@ class train(object):
   def deep_learn(self,model, opt, loss, train, test):
     train_loss = test_loss = train_correct = test_correct  = 0.0
     tf.keras.backend.set_learning_phase(1)
-    
+    inputs = keras.Input(shape=(28,28,1), name='Inputs')
+    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_1')(inputs)
+    x = layers.MaxPool2D(2,2)(x)
+    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_2')(x)
+    x = layers.MaxPool2D(2,2)(x)
+    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_3')(x)
+    x = layers.GlobalAveragePooling2D()(x)
+    # x = layers.Dense(10, activation='relu', name='dense_2')(x)
+    outputs = layers.Dense(10, activation='softmax', name='predictions')(x)
+    model = keras.Model(inputs=inputs, outputs=outputs)
     for x in tqdm(train):
       with tf.GradientTape() as tape:
         data=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
         print('predictioning')
-        predictions = self.model(data)
+        predictions = model(data)
         print('got predictions')
         if self.trace:
           with self.train_summary_writer.as_default():        
