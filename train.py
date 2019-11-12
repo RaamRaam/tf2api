@@ -164,7 +164,7 @@ class train(object):
             tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
           tf.summary.trace_off()
           self.trace=False
-        loss = tf.reduce_sum(self.lossfunction(labels,predictions))
+        loss = self.lossfunction(labels,predictions)
       grads = tape.gradient(loss, model.trainable_weights)
       self.global_step.assign_add(1)
       opt.apply_gradients(zip(grads, model.trainable_weights))
@@ -183,7 +183,7 @@ class train(object):
       data=tf.cast(x['features'],tf.float16)
       labels=tf.cast(x['lables'],tf.int32)
       predictions = model(data)
-      loss = tf.reduce_sum(self.lossfunction(labels,predictions))
+      loss = self.lossfunction(labels,predictions)
       correct = tf.reduce_sum(tf.cast(tf.math.equal(tf.cast(tf.argmax(predictions, axis = 1),tf.int32), labels), tf.float32))
       test_loss += loss.numpy()
       test_correct += correct.numpy()
