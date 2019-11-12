@@ -36,9 +36,14 @@ class train(object):
     self.model=hparams['MODEL']
     self.train_ds=hparams['TRAIN_DS']
     self.test_ds=hparams['TEST_DS']
+    self.epochs=hparams['EPOCHS']
+    self.batch_size=hparams['BATCH_SIZE']
 
     self.trace=True
     self.global_step = tf.Variable(0)
+    self.start_epoch=0
+    self.global_step_reminder = 0
+
 
     self.lr_peak=hparams['LR_PEAK']
     self.lr_repeat=hparams['LR_REPEAT']
@@ -47,18 +52,15 @@ class train(object):
     self.lr_mode=hparams['LR_MODE']
     self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
 
+    self.optimizer=hparams['OPTIMIZER'](self.lr)
+    self.lossfunction=hparams['LOSSFUNCTION']
+
     self.log_path=hparams['LOG_PATH']
     self.train_log=self.log_path+'/train_log'
     self.test_log=self.log_path+'/test_log'
     self.train_summary_writer = tf.summary.create_file_writer(self.train_log)
     self.test_summary_writer = tf.summary.create_file_writer(self.test_log)
 
-    self.start_epoch=0
-    self.epochs=hparams['EPOCHS']
-    self.batch_size=hparams['BATCH_SIZE']
-    self.global_step_reminder = 0
-    self.optimizer=hparams['OPTIMIZER'](self.lr)
-    self.lossfunction=hparams['LOSSFUNCTION']
 
 
 
