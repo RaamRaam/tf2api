@@ -71,11 +71,24 @@ class train(object):
     test_ds_batches = self.test_ds.ds.shuffle(self.batch_size).batch(self.batch_size).prefetch(self.batch_size)
     print('training....')
     t = time.time()
+    
+    inputs = keras.Input(shape=(28,28,1), name='Inputs')
+    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_1')(inputs)
+    x = layers.MaxPool2D(2,2)(x)
+    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_2')(x)
+    x = layers.MaxPool2D(2,2)(x)
+    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_3')(x)
+    x = layers.GlobalAveragePooling2D()(x)
+    # x = layers.Dense(10, activation='relu', name='dense_2')(x)
+    outputs = layers.Dense(10, activation='softmax', name='predictions')(x)
+    model = keras.Model(inputs=inputs, outputs=outputs)
+
+
     if self.trace:
       tf.summary.trace_on(graph=True, profiler=False)
     for epoch in range(self.start_epoch,self.start_epoch+self.epochs):
       train_ds_batches = self.train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
-      learnings=self.deep_learn(self.model, self.optimizer, None, train_ds_batches, test_ds_batches)
+      learnings=self.deep_learn(model, self.optimizer, None, train_ds_batches, test_ds_batches)
       lr=self.optimizer.learning_rate*self.batch_size
       train_loss=learnings[0][0]/self.train_ds.length
       train_acc=learnings[0][1]/self.train_ds.length
@@ -142,16 +155,7 @@ class train(object):
   def deep_learn(self,model, opt, loss, train, test):
     train_loss = test_loss = train_correct = test_correct  = 0.0
     tf.keras.backend.set_learning_phase(1)
-    inputs = keras.Input(shape=(28,28,1), name='Inputs')
-    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_1')(inputs)
-    x = layers.MaxPool2D(2,2)(x)
-    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_2')(x)
-    x = layers.MaxPool2D(2,2)(x)
-    x = layers.Conv2D(filters=10,kernel_size=(3,3), activation='relu', name='Conv_3')(x)
-    x = layers.GlobalAveragePooling2D()(x)
-    # x = layers.Dense(10, activation='relu', name='dense_2')(x)
-    outputs = layers.Dense(10, activation='softmax', name='predictions')(x)
-    model = keras.Model(inputs=inputs, outputs=outputs)
+
     for x in tqdm(train):
       with tf.GradientTape() as tape:
         data=tf.cast(x['features'],tf.float16)
@@ -174,7 +178,6 @@ class train(object):
       train_correct += correct.numpy()
       with self.train_summary_writer.as_default():
         tf.summary.scalar('LR', opt.learning_rate, step=self.global_step_reminder+self.global_step.numpy())
-
     train_metrics=(train_loss,train_correct)
     
     
