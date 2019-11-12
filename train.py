@@ -165,7 +165,7 @@ class train(object):
           tf.summary.trace_off()
           self.trace=False
         loss = tf.reduce_sum(self.lossfunction(labels,predictions))
-      grads = tape.gradient(loss, model.trainable_variables)
+      grads = tape.gradient(loss, model.trainable_weights)
       self.global_step.assign_add(1)
       opt.apply_gradients(zip(grads, model.trainable_weights))
       
