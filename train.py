@@ -145,7 +145,9 @@ class train(object):
       with tf.GradientTape() as tape:
         data=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
+        print('predictioning')
         predictions = self.model(data)
+        print('got predictions')
         if self.trace:
           with self.train_summary_writer.as_default():        
             tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
