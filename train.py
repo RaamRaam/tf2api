@@ -55,7 +55,7 @@ class train(object):
 
     self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
     self.lr_mode=hparams['LR_MODE']
-    self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
+    self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
     # self.lr=self.linear_lr()
 
     self.optimizer=hparams['OPTIMIZER'](self.lr)
@@ -182,7 +182,7 @@ class train(object):
 
 
 
-  def linear_lr(self,datalen,batch_size,epochs,lr_mode,lr_peak,lr_repeat,lr_interpolate):
+  def linear_lr(self,datalen,batch_size,epochs,lr_mode,lr_peak,lr_repeat):
     x = list(range(0,epochs+1,round(epochs*(1/lr_repeat))))
     x = x + [epochs] if x[-1]!=epochs else x
 
