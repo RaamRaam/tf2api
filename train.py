@@ -165,7 +165,7 @@ class train(object):
         tf.summary.scalar('loss', self.test_mean_loss, step=epoch+1)
         tf.summary.scalar('accuracy', self.test_mean_accuracy, step=epoch+1)
 
-      print('Epoch: ', epoch, '  loss:    ', train_mean_loss, '  accuracy: ',train_mean_accuracy, '  loss:    ', test_mean_loss, '  accuracy: ',test_mean_accuracy)
+      print('Epoch: ', epoch, 'train loss:    ', self.train_mean_loss, '  train accuracy: ',self.train_mean_accuracy, '  test loss:    ', self.test_mean_loss, '  test accuracy: ',self.test_mean_accuracy)
   
   @tf.function
   def deep_learn(self,inputs, labels, mode):
