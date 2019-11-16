@@ -165,12 +165,8 @@ class train(object):
 
   def linear_lr(self):
     iterations=math.ceil(self.train_ds.length/self.batch_size)*self.epochs
-    if self.lr_interpolate:
-      x = list(range(0,iterations+1,round(iterations*(1/self.lr_repeat))))
-      x = x + [iterations] if x[-1]!=iterations else x
-    else:
-      x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
-      x = x + [self.epochs] if x[-1]!=self.epochs else x
+    x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
+    x = x + [self.epochs] if x[-1]!=self.epochs else x
 
     
     if self.lr_mode=='stepup':
