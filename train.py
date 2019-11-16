@@ -120,11 +120,11 @@ class train(object):
       with self.test_summary_writer.as_default():
         tf.summary.scalar('loss', self.test_mean_loss, step=epoch+1)
         tf.summary.scalar('accuracy', self.test_mean_accuracy, step=epoch+1)
+
+      print('Epoch: ', epoch, 'train loss:    ', self.train_mean_loss, '  train accuracy: ',self.train_mean_accuracy, '  test loss:    ', self.test_mean_loss, '  test accuracy: ',self.test_mean_accuracy)
     self.start_epoch=epoch+1  
     self.global_step_reminder=self.global_step
     self.global_step = 0
-
-      print('Epoch: ', epoch, 'train loss:    ', self.train_mean_loss, '  train accuracy: ',self.train_mean_accuracy, '  test loss:    ', self.test_mean_loss, '  test accuracy: ',self.test_mean_accuracy)
   
   @tf.function
   def deep_learn(self,inputs, labels, mode):
