@@ -34,7 +34,7 @@ class ConvBN(tf.keras.Model):
 class train(object):
   def __init__(self, hparams):
     self.name=hparams['NAME']
-    self.model=hparams['MODEL']
+    self.model=hparams['MODEL']()
     self.train_ds=hparams['TRAIN_DS']
     self.test_ds=hparams['TEST_DS']
     self.epochs=hparams['EPOCHS']
@@ -121,7 +121,7 @@ class train(object):
         tf.summary.scalar('loss', self.test_mean_loss, step=epoch+1)
         tf.summary.scalar('accuracy', self.test_mean_accuracy, step=epoch+1)
 
-      print('Epoch: ', epoch, 'train loss:    ', self.train_mean_loss, '  train accuracy: ',self.train_mean_accuracy, '  test loss:    ', self.test_mean_loss, '  test accuracy: ',self.test_mean_accuracy)
+      print('Epoch: ', epoch+1, 'train loss:    ', self.train_mean_loss, '  train accuracy: ',self.train_mean_accuracy, '  test loss:    ', self.test_mean_loss, '  test accuracy: ',self.test_mean_accuracy)
     self.start_epoch=epoch+1  
     self.global_step_reminder=self.global_step
     self.global_step = 0
