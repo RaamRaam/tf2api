@@ -92,6 +92,8 @@ class train(object):
       for x in tqdm(train_ds_batches):
         self.global_step=self.global_step+1
         self.optimizer.learning_rate=self.lr
+        with self.train_summary_writer.as_default():    
+          tf.summary.scalar('LR', self.optimizer.lr, step=self.global_step_reminder+self.global_step)
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
         predictions=self.deep_learn(inputs, labels, 'train')
@@ -112,7 +114,7 @@ class train(object):
       self.test_mean_accuracy = self.test_accuracy_metric.result().numpy()
 
       with self.train_summary_writer.as_default():
-        tf.summary.scalar('LR', self.optimizer.lr, step=self.global_step_reminder+self.global_step)
+        # tf.summary.scalar('LR', self.optimizer.lr, step=self.global_step_reminder+self.global_step)
         tf.summary.scalar('loss', self.train_mean_loss, step=epoch+1)
         tf.summary.scalar('accuracy', self.train_mean_accuracy, step=epoch+1)
         tf.summary.scalar('epochs', self.epochs, step=epoch+1)
