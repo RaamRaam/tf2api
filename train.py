@@ -156,6 +156,7 @@ class train(object):
       self.test_mean_accuracy = self.test_accuracy_metric.result().numpy()
 
       with self.train_summary_writer.as_default():
+        tf.summary.scalar('LR', self.optimizer.lr, step=epoch+1)
         tf.summary.scalar('loss', self.train_mean_loss, step=epoch+1)
         tf.summary.scalar('accuracy', self.train_mean_accuracy, step=epoch+1)
         tf.summary.scalar('epochs', self.epochs, step=epoch+1)
@@ -169,7 +170,6 @@ class train(object):
   
   @tf.function
   def deep_learn(self,inputs, labels, mode):
-    # global global_step
     with tf.GradientTape() as tape:
       # predictions = model(inputs, training=True if mode=='train' else False)
       predictions = self.model(inputs)
