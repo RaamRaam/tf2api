@@ -205,6 +205,6 @@ class train(object):
     if self.lr_interpolate:
       lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/self.batch_size
     else:
-      lr_func = lambda: lr_schedule(math.ceiling(self.global_step/batches_per_epoch))/self.batch_size
+      lr_func = lambda: lr_schedule(math.ceil(self.global_step/batches_per_epoch))/self.batch_size
     return lr_func
 
