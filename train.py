@@ -54,8 +54,8 @@ class train(object):
 
     self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
     self.lr_mode=hparams['LR_MODE']
-    # self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
-    self.lr=self.linear_lr()
+    self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
+    # self.lr=self.linear_lr()
 
     self.optimizer=hparams['OPTIMIZER'](self.lr)
     self.lossfunction=hparams['LOSSFUNCTION']
@@ -163,7 +163,52 @@ class train(object):
         lst_predictions=[list(i) for i in lst_predictions1]
       return lst_actuals,lst_predictions
 
-  def linear_lr(self):
+
+
+  def linear_lr(datalen,batch_size,epochs,lr_mode,lr_peak,lr_repeat,lr_interpolate):
+    x = list(range(0,epochs+1,round(epochs*(1/lr_repeat))))
+    x = x + [epochs] if x[-1]!=epochs else x
+
+    
+    if lr_mode=='stepup':
+      z=[i+1 for i in x]
+      x.extend(z[1:])
+      x=sorted(x)[:-1]
+      y=[lr_peak if i%2==0 else 0 for i in range(len(x))]
+
+    if lr_mode=='stepdown':
+      z=[i+1 for i in x]
+      x.extend(z[1:])
+      x=sorted(x)[:-1]
+      y=[lr_peak if i%2==1 else 0 for i in range(len(x))]
+
+    if lr_mode=='angledup':
+      z=[round((x[i]+x[i+1])/2) for i in range(len(x)-1)]
+      x.extend(z)
+      x=sorted(x)
+      y=[lr_peak if i%2==0 else 0 for i in range(len(x))]
+
+    if lr_mode=='angleddown':
+      z=[round((x[i]+x[i+1])/2) for i in range(len(x)-1)]
+      x.extend(z)
+      x=sorted(x)
+      y=[lr_peak if i%2==1 else 0 for i in range(len(x))]
+
+    if lr_mode=='constant':
+      y=[lr_peak] * len(x)
+
+    lr_schedule = lambda t: np.interp([t], x, y)[0]
+    batches_per_epoch = datalen//batch_size + 1
+
+    if lr_interpolate:
+      lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/batch_size
+    else:
+      lr_func = lambda: lr_schedule(math.ceil(self.global_step/batches_per_epoch))/batch_size
+    return lr_func
+
+
+
+  def linear_lr1(self):
     x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
     x = x + [self.epochs] if x[-1]!=self.epochs else x
 
