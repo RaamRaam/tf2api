@@ -93,7 +93,7 @@ class train(object):
     file = open(self.name+'/'+self.name+'.pkl', 'rb')
     self.hparams=pickle.load(file)
     file.close
-
+    return new_model,self.hparams
 
 
   @timer  
