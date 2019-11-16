@@ -6,6 +6,7 @@ import math
 import datetime,time
 from tensorflow import keras
 from tensorflow.keras import layers
+import numpy as np
 
 tf.keras.backend.set_floatx('float16')
 
@@ -147,10 +148,11 @@ class train(object):
       
   def evaluate(self,ds):
       ds = ds.batch(self.batch_size).prefetch(self.batch_size)
+      predictions = np.array([])
       for x in ds:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        predictions=self.deep_learn(inputs, labels, 'test')
+        predictions=np.vstack(predictions,self.deep_learn(inputs, labels, 'test').numpy())
       return predictions
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
