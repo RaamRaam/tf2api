@@ -41,7 +41,7 @@ class train(object):
     self.epochs=hparams['EPOCHS']
     self.batch_size=hparams['BATCH_SIZE']
 
-    self.trace=True
+    # self.trace=True
     self.global_step = 0
     self.start_epoch=0
     self.global_step_reminder = 0
@@ -127,8 +127,8 @@ class train(object):
       self.train_accuracy_metric.reset_states()
       self.test_loss_metric.reset_states()
       self.test_accuracy_metric.reset_states()
-      if self.trace:
-        tf.summary.trace_on(graph=True, profiler=False)
+      # if self.trace:
+      #   tf.summary.trace_on(graph=True, profiler=False)
 
       train_ds_batches = self.train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
       tf.keras.backend.set_learning_phase(1)
@@ -138,11 +138,11 @@ class train(object):
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
         self.deep_learn(inputs, labels, 'train')
-        if self.trace:
-          with train_summary_writer.as_default():        
-            tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
-          tf.summary.trace_off()
-          self.trace=False
+        # if self.trace:
+        #   with self.train_summary_writer.as_default():        
+        #     tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
+        #   tf.summary.trace_off()
+        #   self.trace=False
 
       self.train_mean_loss = self.train_loss_metric.result().numpy()
       self.train_mean_accuracy = self.train_accuracy_metric.result().numpy()
