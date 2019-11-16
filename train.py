@@ -89,7 +89,7 @@ class train(object):
       #   tf.summary.trace_on(graph=True, profiler=False)
 
       train_ds_batches = self.train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
-      for x in train_ds_batches:
+      for x in tqdm(train_ds_batches):
         self.global_step=self.global_step+1
         self.optimizer.learning_rate=self.lr
         inputs=tf.cast(x['features'],tf.float16)
@@ -148,14 +148,11 @@ class train(object):
       
   def evaluate(self,ds):
       ds = ds.batch(self.batch_size).prefetch(self.batch_size)
-      start=True
+      lst_predictions=[]
       for x in ds:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        if start:
-          predictions=self.deep_learn(inputs, labels, 'test').numpy()
-        else:  
-          predictions=np.vstack((predictions,self.deep_learn(inputs, labels, 'test').numpy()))
+        predictions=lst_predictions.extend(list(self.deep_learn(inputs, labels, 'test').numpy()))
       return predictions
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
