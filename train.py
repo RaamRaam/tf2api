@@ -172,7 +172,7 @@ class train(object):
     # global global_step
     with tf.GradientTape() as tape:
       # predictions = model(inputs, training=True if mode=='train' else False)
-      predictions = model(inputs)
+      predictions = self.model(inputs)
       # regularization_loss = tf.math.add_n(model.losses)
       pred_loss = loss_fn(labels, predictions)
       total_loss = pred_loss #+ regularization_loss
