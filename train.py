@@ -49,7 +49,9 @@ class train(object):
 
     self.lr_peak=hparams['LR_PEAK']
     self.lr_repeat=hparams['LR_REPEAT']
-    self.lr_interpolate=hparams['LR_INTERPOLATE']
+
+    self.lr_interpolate=True if hparams['LR_CHANGE_EVERY']=='ITERATIONS' else False
+
     self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
     self.lr_mode=hparams['LR_MODE']
     self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
@@ -160,41 +162,43 @@ class train(object):
         lst_predictions=[list(i) for i in lst_predictions1]
       return lst_actuals,lst_predictions
 
-  def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
-    x=list(range(0,epochs+1,round(epochs*(1/repeat))))
-    x= x + [epochs] if x[-1]!=epochs else x
+  def linear_lr(self):
+    x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
+    x = x + [self.epochs] if x[-1]!=self.epochs else x
     
-    if mode=='stepup':
+    if self.lr_mode=='stepup':
       z=[i+1 for i in x]
       x.extend(z[1:])
       x=sorted(x)[:-1]
-      y=[peak_lr if i%2==0 else 0 for i in range(len(x))]
-    if mode=='stepdown':
+      y=[self.lr_peak if i%2==0 else 0 for i in range(len(x))]
+
+    if self.lr_mode=='stepdown':
       z=[i+1 for i in x]
       x.extend(z[1:])
       x=sorted(x)[:-1]
-      y=[peak_lr if i%2==1 else 0 for i in range(len(x))]
+      y=[self.lr_peak if i%2==1 else 0 for i in range(len(x))]
 
-    if mode=='angledup':
+    if self.lr_mode=='angledup':
       z=[round((x[i]+x[i+1])/2) for i in range(len(x)-1)]
       x.extend(z)
       x=sorted(x)
-      y=[peak_lr if i%2==0 else 0 for i in range(len(x))]
-    if mode=='angleddown':
+      y=[self.lr_peak if i%2==0 else 0 for i in range(len(x))]
+
+    if self.lr_mode=='angleddown':
       z=[round((x[i]+x[i+1])/2) for i in range(len(x)-1)]
       x.extend(z)
       x=sorted(x)
-      y=[peak_lr if i%2==1 else 0 for i in range(len(x))]
+      y=[self.lr_peak if i%2==1 else 0 for i in range(len(x))]
 
-    if mode=='constant':
-      y=[peak_lr] * len(x)
+    if self.lr_mode=='constant':
+      y=[self.lr_peak] * len(x)
 
     lr_schedule = lambda t: np.interp([t], x, y)[0]
-    batches_per_epoch = data_len//batch_size + 1
+    batches_per_epoch = self.train_ds.length//self.batch_size + 1
 
-    if interpolate:
-      lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/batch_size
+    if self.lr_interpolate:
+      lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/self.batch_size
     else:
-      lr_func = lambda: lr_schedule(math.ceiling(self.global_step/batches_per_epoch))/batch_size
+      lr_func = lambda: lr_schedule(math.ceiling(self.global_step/batches_per_epoch))/self.batch_size
     return lr_func
 
