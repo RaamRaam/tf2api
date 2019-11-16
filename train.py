@@ -155,13 +155,13 @@ class train(object):
       self.test_mean_loss = self.test_loss_metric.result().numpy()
       self.test_mean_accuracy = self.test_accuracy_metric.result().numpy()
 
-      with train_summary_writer.as_default():
+      with self.train_summary_writer.as_default():
         tf.summary.scalar('loss', self.train_mean_loss, step=epoch+1)
         tf.summary.scalar('accuracy', self.train_mean_accuracy, step=epoch+1)
         tf.summary.scalar('epochs', self.epochs, step=epoch+1)
         tf.summary.scalar('batch_size', self.batch_size, step=epoch+1)
 
-      with test_summary_writer.as_default():
+      with self.test_summary_writer.as_default():
         tf.summary.scalar('loss', self.test_mean_loss, step=epoch+1)
         tf.summary.scalar('accuracy', self.test_mean_accuracy, step=epoch+1)
 
