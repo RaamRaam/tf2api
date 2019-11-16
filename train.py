@@ -34,7 +34,7 @@ class ConvBN(tf.keras.Model):
 
 class train(object):
   def __init__(self, hparams):
-
+    import datetime,time
     self.name=hparams['NAME']
     self.model=hparams['MODEL']
     self.train_ds=hparams['TRAIN_DS']
@@ -175,7 +175,6 @@ class train(object):
   @tf.function
   def deep_learn(self,inputs, labels, mode):
     with tf.GradientTape() as tape:
-      # predictions = model(inputs, training=True if mode=='train' else False)
       predictions = self.model(inputs)
       # regularization_loss = tf.math.add_n(model.losses)
       pred_loss = self.lossfunction(labels, predictions)
