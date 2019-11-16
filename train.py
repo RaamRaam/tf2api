@@ -174,7 +174,7 @@ class train(object):
       # predictions = model(inputs, training=True if mode=='train' else False)
       predictions = self.model(inputs)
       # regularization_loss = tf.math.add_n(model.losses)
-      pred_loss = loss_fn(labels, predictions)
+      pred_loss = self.lossfunction(labels, predictions)
       total_loss = pred_loss #+ regularization_loss
     gradients = tape.gradient(total_loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
