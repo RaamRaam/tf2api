@@ -146,7 +146,7 @@ class train(object):
     return predictions
       
   def evaluate(self,ds):
-      ds = ds.shuffle(self.ds.length).batch(self.batch_size).prefetch(self.batch_size)
+      ds = ds.batch(self.batch_size).prefetch(self.batch_size)
       for x in ds:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
