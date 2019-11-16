@@ -54,7 +54,8 @@ class train(object):
 
     self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
     self.lr_mode=hparams['LR_MODE']
-    self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
+    # self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat,self.lr_interpolate)
+    self.lr=self.linear_lr(self)
 
     self.optimizer=hparams['OPTIMIZER'](self.lr)
     self.lossfunction=hparams['LOSSFUNCTION']
@@ -163,8 +164,13 @@ class train(object):
       return lst_actuals,lst_predictions
 
   def linear_lr(self):
-    x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
-    x = x + [self.epochs] if x[-1]!=self.epochs else x
+    if self.lr_interpolate:
+      x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
+      x = x + [self.epochs] if x[-1]!=self.epochs else x
+    else:
+      x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
+      x = x + [self.epochs] if x[-1]!=self.epochs else x
+      
     
     if self.lr_mode=='stepup':
       z=[i+1 for i in x]
