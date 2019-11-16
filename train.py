@@ -88,9 +88,9 @@ class train(object):
     file.close
 
 
-  def load(self):
-    new_model = tf.keras.models.load_model(self.name+'/'+self.name+'.h5')
-    file = open(self.name+'/'+self.name+'.pkl', 'rb')
+  def load(self,path):
+    new_model = tf.keras.models.load_model(path+'/'+self.name+'.h5')
+    file = open(path+'/'+self.name+'.pkl', 'rb')
     self.hparams=pickle.load(file)
     file.close
     return new_model,self.hparams
