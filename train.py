@@ -164,14 +164,8 @@ class train(object):
       return lst_actuals,lst_predictions
 
   def linear_lr(self):
-    batches_per_epoch = self.train_ds.length//self.batch_size + 1
-    iterations=batches_per_epoch*self.epochs
-    if self.lr_interpolate:
-      x = list(range(0,iterations+1,round(iterations*(1/self.lr_repeat))))
-      x = x + [iterations] if x[-1]!=iterations else x
-    else:
-      x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
-      x = x + [self.epochs] if x[-1]!=self.epochs else x
+    x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
+    x = x + [self.epochs] if x[-1]!=self.epochs else x
 
     
     if self.lr_mode=='stepup':
@@ -202,6 +196,8 @@ class train(object):
       y=[self.lr_peak] * len(x)
 
     lr_schedule = lambda t: np.interp([t], x, y)[0]
+    batches_per_epoch = self.train_ds.length//self.batch_size + 1
+    iterations=batches_per_epoch*self.epochs
     
     gs=self.global_step_reminder+self.global_step
     if self.lr_interpolate:
