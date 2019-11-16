@@ -34,9 +34,6 @@ class ConvBN(tf.keras.Model):
 
 class train(object):
   def __init__(self, hparams):
-    self.hparams=hparams
-    del self.hparams['TRAIN_DS']
-    del self.hparams['TEST_DS']
 
     self.name=hparams['NAME']
     self.model=hparams['MODEL']()
@@ -78,6 +75,10 @@ class train(object):
     self.train_accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
     self.test_loss_metric = tf.keras.metrics.Mean(name='test_loss')
     self.test_accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+
+    self.hparams=hparams
+    del self.hparams['TRAIN_DS']
+    del self.hparams['TEST_DS']
 
   def save(self):
     self.model.save(self.name+'/'+self.name+'.h5')
