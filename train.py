@@ -8,7 +8,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 tf.keras.backend.set_floatx('float16')
-current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
 
 class Conv11(tf.keras.Model):
   def __init__(self, c_out):
@@ -56,7 +56,7 @@ class train(object):
     self.optimizer=hparams['OPTIMIZER'](self.lr)
     self.lossfunction=hparams['LOSSFUNCTION']
 
-    
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")    
     self.log_path=hparams['LOG_PATH'] + '/' + self.name + '/' + current_time
     
     
