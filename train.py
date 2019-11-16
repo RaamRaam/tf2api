@@ -4,6 +4,7 @@ from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPool2D, GlobalMax
 from tqdm import tqdm_notebook as tqdm
 import math
 import datetime,time
+from datetime import datetime
 from tensorflow import keras
 from tensorflow.keras import layers
 
