@@ -134,7 +134,7 @@ class train(object):
       tf.keras.backend.set_learning_phase(1)
       for x in train_ds_batches:
         self.global_step=self.global_step+1
-        self.optimizer.learning_rate=lr
+        self.optimizer.learning_rate=self.lr
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
         self.deep_learn(inputs, labels, 'train')
