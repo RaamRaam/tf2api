@@ -151,7 +151,7 @@ class train(object):
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
         predictions=self.deep_learn(inputs, labels, 'test')
-        return predictions
+      return predictions
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
     x=list(range(0,epochs+1,round(epochs*(1/repeat))))
