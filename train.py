@@ -93,7 +93,7 @@ class train(object):
         self.optimizer.learning_rate=self.lr
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        self.deep_learn(inputs, labels, 'train')
+        predictions=self.deep_learn(inputs, labels, 'train')
         # if self.trace:
         #   with self.train_summary_writer.as_default():        
         #     tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
@@ -106,7 +106,7 @@ class train(object):
       for x in train_ds_batches:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        self.deep_learn(inputs, labels, 'test')
+        predictions=self.deep_learn(inputs, labels, 'test')
       self.test_mean_loss = self.test_loss_metric.result().numpy()
       self.test_mean_accuracy = self.test_accuracy_metric.result().numpy()
 
@@ -133,8 +133,9 @@ class train(object):
       # regularization_loss = tf.math.add_n(model.losses)
       pred_loss = self.lossfunction(labels, predictions)
       total_loss = pred_loss #+ regularization_loss
-    gradients = tape.gradient(total_loss, self.model.trainable_variables)
-    self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
+      if mode=='train':
+        gradients = tape.gradient(total_loss, self.model.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
       
     if mode=='train':
       self.train_loss_metric.update_state(total_loss)
@@ -142,9 +143,15 @@ class train(object):
     else:
       self.test_loss_metric.update_state(total_loss)
       self.test_accuracy_metric.update_state(labels, predictions)
-
-
-
+    return predictions
+      
+  def evaluate(self,ds):
+      ds = ds.shuffle(self.ds.length).batch(self.batch_size).prefetch(self.batch_size)
+      for x in ds:
+        inputs=tf.cast(x['features'],tf.float16)
+        labels=tf.cast(x['lables'],tf.int32)
+        predictions=self.deep_learn(inputs, labels, 'test')
+        return predictions
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
     x=list(range(0,epochs+1,round(epochs*(1/repeat))))
