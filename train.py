@@ -177,14 +177,14 @@ class train(object):
       pred_loss = self.lossfunction(labels, predictions)
       total_loss = pred_loss #+ regularization_loss
     gradients = tape.gradient(total_loss, self.model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
+    self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
       
     if mode=='train':
-      train_loss_metric.update_state(total_loss)
-      train_accuracy_metric.update_state(labels, predictions)
+      self.train_loss_metric.update_state(total_loss)
+      self.train_accuracy_metric.update_state(labels, predictions)
     else:
-      test_loss_metric.update_state(total_loss)
-      test_accuracy_metric.update_state(labels, predictions)
+      self.test_loss_metric.update_state(total_loss)
+      self.test_accuracy_metric.update_state(labels, predictions)
 
 
 
