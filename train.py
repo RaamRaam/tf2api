@@ -165,7 +165,7 @@ class train(object):
 
 
 
-  def linear_lr(datalen,batch_size,epochs,lr_mode,lr_peak,lr_repeat,lr_interpolate):
+  def linear_lr(self,datalen,batch_size,epochs,lr_mode,lr_peak,lr_repeat,lr_interpolate):
     x = list(range(0,epochs+1,round(epochs*(1/lr_repeat))))
     x = x + [epochs] if x[-1]!=epochs else x
 
