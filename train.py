@@ -57,7 +57,10 @@ class train(object):
     self.optimizer=hparams['OPTIMIZER'](self.lr)
     self.lossfunction=hparams['LOSSFUNCTION']
 
-    self.log_path=hparams['LOG_PATH']
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    self.log_path=hparams['LOG_PATH'] + '/' + self.name + '/' + current_time
+    
+    
     self.train_log=self.log_path+'/train_log'
     self.test_log=self.log_path+'/test_log'
     self.train_summary_writer = tf.summary.create_file_writer(self.train_log)
