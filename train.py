@@ -152,7 +152,7 @@ class train(object):
       for x in ds:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        predictions=np.vstack(predictions,self.deep_learn(inputs, labels, 'test').numpy())
+        predictions=np.vstack((predictions,self.deep_learn(inputs, labels, 'test').numpy()))
       return predictions
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
