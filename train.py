@@ -109,7 +109,7 @@ class train(object):
       self.train_mean_loss = self.train_loss_metric.result().numpy()
       self.train_mean_accuracy = self.train_accuracy_metric.result().numpy()
 
-      for x in train_ds_batches:
+      for x in test_ds_batches:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
         predictions=self.deep_learn(inputs, labels, 'test')
@@ -164,9 +164,14 @@ class train(object):
       return lst_actuals,lst_predictions
 
   def linear_lr(self):
-    iterations=math.ceil(self.train_ds.length/self.batch_size)*self.epochs
-    x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
-    x = x + [self.epochs] if x[-1]!=self.epochs else x
+    batches_per_epoch = self.train_ds.length//self.batch_size + 1
+    iterations=batches_per_epoch*self.epochs
+    if self.lr_interpolate:
+      x = list(range(0,iterations+1,round(iterations*(1/self.lr_repeat))))
+      x = x + [iterations] if x[-1]!=iterations else x
+    else:
+      x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
+      x = x + [self.epochs] if x[-1]!=self.epochs else x
 
     
     if self.lr_mode=='stepup':
@@ -197,11 +202,11 @@ class train(object):
       y=[self.lr_peak] * len(x)
 
     lr_schedule = lambda t: np.interp([t], x, y)[0]
-    batches_per_epoch = self.train_ds.length//self.batch_size + 1
-
+    
+    gs=self.global_step_reminder+self.global_step
     if self.lr_interpolate:
-      lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/self.batch_size
+      lr_func = lambda: lr_schedule(gs/batches_per_epoch)/self.batch_size
     else:
-      lr_func = lambda: lr_schedule(math.ceil(self.global_step/batches_per_epoch))/self.batch_size
+      lr_func = lambda: lr_schedule(math.ceil(gs/batches_per_epoch))/self.batch_size
     return lr_func
 
