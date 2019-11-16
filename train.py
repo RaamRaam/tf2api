@@ -148,11 +148,14 @@ class train(object):
       
   def evaluate(self,ds):
       ds = ds.batch(self.batch_size).prefetch(self.batch_size)
-      predictions = np.array([])
+      start=True
       for x in ds:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        predictions=np.vstack((predictions,self.deep_learn(inputs, labels, 'test').numpy()))
+        if start:
+          predictions=self.deep_learn(inputs, labels, 'test').numpy()
+        else:  
+          predictions=np.vstack((predictions,self.deep_learn(inputs, labels, 'test').numpy()))
       return predictions
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
