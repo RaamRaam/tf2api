@@ -34,6 +34,10 @@ class ConvBN(tf.keras.Model):
 
 class train(object):
   def __init__(self, hparams):
+    self.hparams=hparams
+    del self.hparams['TRAIN_DS']
+    del self.hparams['TEST_DS']
+
     self.name=hparams['NAME']
     self.model=hparams['MODEL']()
     self.train_ds=hparams['TRAIN_DS']
@@ -50,7 +54,7 @@ class train(object):
     self.lr_peak=hparams['LR_PEAK']
     self.lr_repeat=hparams['LR_REPEAT']
 
-    self.lr_interpolate=True if hparams['LR_CHANGE_EVERY']=='ITERATIONS' else False
+    # self.lr_interpolate=True if hparams['LR_CHANGE_EVERY']=='ITERATIONS' else False
 
     self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
     self.lr_mode=hparams['LR_MODE']
@@ -75,6 +79,18 @@ class train(object):
     self.test_loss_metric = tf.keras.metrics.Mean(name='test_loss')
     self.test_accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
 
+  def save(self):
+    self.model.save(self.name+'/'+self.name+'.h5')
+    file = open(self.name+'/'+self.name+'.pkl', 'wb')
+    pickle.dump(self.hparams, file)
+    file.close
+
+
+  def load(self):
+    new_model = tf.keras.models.load_model(self.name+'/'+self.name+'.h5')
+    file = open(self.name+'/'+self.name+'.pkl', 'rb')
+    self.hparams=pickle.load(file)
+    file.close
 
 
 
@@ -169,7 +185,6 @@ class train(object):
     x = list(range(0,epochs+1,round(epochs*(1/lr_repeat))))
     x = x + [epochs] if x[-1]!=epochs else x
 
-    
     if lr_mode=='stepup':
       z=[i+1 for i in x]
       x.extend(z[1:])
@@ -200,54 +215,10 @@ class train(object):
     lr_schedule = lambda t: np.interp([t], x, y)[0]
     batches_per_epoch = datalen//batch_size + 1
 
-    if lr_interpolate:
-      lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/batch_size
-    else:
-      lr_func = lambda: lr_schedule(math.ceil(self.global_step/batches_per_epoch))/batch_size
+    # if lr_interpolate:
+    lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/batch_size
+    # else:
+    #   lr_func = lambda: lr_schedule(math.ceil(self.global_step/batches_per_epoch))/batch_size
     return lr_func
 
-
-
-  def linear_lr1(self):
-    x = list(range(0,self.epochs+1,round(self.epochs*(1/self.lr_repeat))))
-    x = x + [self.epochs] if x[-1]!=self.epochs else x
-
-    
-    if self.lr_mode=='stepup':
-      z=[i+1 for i in x]
-      x.extend(z[1:])
-      x=sorted(x)[:-1]
-      y=[self.lr_peak if i%2==0 else 0 for i in range(len(x))]
-
-    if self.lr_mode=='stepdown':
-      z=[i+1 for i in x]
-      x.extend(z[1:])
-      x=sorted(x)[:-1]
-      y=[self.lr_peak if i%2==1 else 0 for i in range(len(x))]
-
-    if self.lr_mode=='angledup':
-      z=[round((x[i]+x[i+1])/2) for i in range(len(x)-1)]
-      x.extend(z)
-      x=sorted(x)
-      y=[self.lr_peak if i%2==0 else 0 for i in range(len(x))]
-
-    if self.lr_mode=='angleddown':
-      z=[round((x[i]+x[i+1])/2) for i in range(len(x)-1)]
-      x.extend(z)
-      x=sorted(x)
-      y=[self.lr_peak if i%2==1 else 0 for i in range(len(x))]
-
-    if self.lr_mode=='constant':
-      y=[self.lr_peak] * len(x)
-
-    lr_schedule = lambda t: np.interp([t], x, y)[0]
-    batches_per_epoch = self.train_ds.length//self.batch_size + 1
-    iterations=batches_per_epoch*self.epochs
-    
-    gs=self.global_step_reminder+self.global_step
-    if self.lr_interpolate:
-      lr_func = lambda: lr_schedule(gs/batches_per_epoch)/self.batch_size
-    else:
-      lr_func = lambda: lr_schedule(math.ceil(gs/batches_per_epoch))/self.batch_size
-    return lr_func
 
