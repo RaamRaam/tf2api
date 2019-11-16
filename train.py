@@ -149,11 +149,13 @@ class train(object):
   def evaluate(self,ds):
       ds = ds.batch(self.batch_size).prefetch(self.batch_size)
       lst_predictions=[]
+      lst_actuals=[]
       for x in ds:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
         lst_predictions.extend(list(self.deep_learn(inputs, labels, 'test').numpy()))
-      return lst_predictions
+        lst_actuals.extend(list(labels))
+      return lst_actuals,lst_predictions
 
   def linear_lr(self,data_len,batch_size,epochs,mode,peak_lr,repeat,interpolate):
     x=list(range(0,epochs+1,round(epochs*(1/repeat))))
