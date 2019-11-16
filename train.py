@@ -7,6 +7,7 @@ import datetime,time
 from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
+import pickle
 
 tf.keras.backend.set_floatx('float16')
 
@@ -80,9 +81,9 @@ class train(object):
     del self.hparams['TRAIN_DS']
     del self.hparams['TEST_DS']
 
-  def save(self):
-    self.model.save(self.name+'/'+self.name+'.h5')
-    file = open(self.name+'/'+self.name+'.pkl', 'wb')
+  def save(self,path):
+    self.model.save(path +'/'+self.name+'.h5')
+    file = open(path +'/'+self.name+'.pkl', 'wb')
     pickle.dump(self.hparams, file)
     file.close
 
