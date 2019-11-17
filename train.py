@@ -81,19 +81,6 @@ class train(object):
     del self.hparams['TRAIN_DS']
     del self.hparams['TEST_DS']
 
-  def save(self,path):
-    self.model.save(path +'/'+self.name+'.h5')
-    file = open(path +'/'+self.name+'.pkl', 'wb')
-    pickle.dump(self.hparams, file)
-    file.close
-
-
-  def load(self,path):
-    new_model = tf.keras.models.load_model(path+'/'+self.name+'.h5')
-    file = open(path+'/'+self.name+'.pkl', 'rb')
-    self.hparams=pickle.load(file)
-    file.close
-    return new_model,self.hparams
 
 
   @timer  
@@ -217,10 +204,21 @@ class train(object):
     lr_schedule = lambda t: np.interp([t], x, y)[0]
     batches_per_epoch = datalen//batch_size + 1
 
-    # if lr_interpolate:
     lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/batch_size
-    # else:
-    #   lr_func = lambda: lr_schedule(math.ceil(self.global_step/batches_per_epoch))/batch_size
     return lr_func
 
 
+
+  def save(self,path):
+    self.model.save(path +'/'+self.name+'.h5')
+    file = open(path +'/'+self.name+'.pkl', 'wb')
+    pickle.dump(self.hparams, file)
+    file.close
+
+
+  def load(self,path):
+    new_model = tf.keras.models.load_model(path+'/'+self.name+'.h5')
+    file = open(path+'/'+self.name+'.pkl', 'rb')
+    self.hparams=pickle.load(file)
+    file.close
+    return new_model,self.hparams
