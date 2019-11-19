@@ -1,4 +1,4 @@
-from .libraries import *
+# from .libraries import *
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPool2D, GlobalMaxPool2D, BatchNormalization
 from tqdm import tqdm_notebook as tqdm
@@ -30,65 +30,71 @@ class ConvBN(tf.keras.Model):
 
   def call(self, inputs):
     return tf.nn.relu(self.bn(self.conv(inputs)))
-
+ 
 
 
 class train(object):
-  def __init__(self, hparams):
-
-    self.name=hparams['NAME']
-    self.model=hparams['MODEL']()
-    self.train_ds=hparams['TRAIN_DS']
-    self.test_ds=hparams['TEST_DS']
-    self.epochs=hparams['EPOCHS']
-    self.batch_size=hparams['BATCH_SIZE']
-
-    # self.trace=True
-    self.global_step = 0
-    self.start_epoch=0
-    self.global_step_reminder = 0
-
-
-    self.lr_peak=hparams['LR_PEAK']
-    self.lr_repeat=hparams['LR_REPEAT']
-
-    # self.lr_interpolate=True if hparams['LR_CHANGE_EVERY']=='ITERATIONS' else False
-
-    self.lr_modes=['constant','stepup','stepdown','angledup','angleddown']
-    self.lr_mode=hparams['LR_MODE']
-    self.lr=self.linear_lr(self.train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
-    # self.lr=self.linear_lr()
-
-    self.optimizer=hparams['OPTIMIZER'](self.lr)
-    self.lossfunction=hparams['LOSSFUNCTION']
-
-    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")    
-    self.log_path=hparams['LOG_PATH'] + '/' + self.name + '/' + current_time
-    
-    
-    self.train_log=self.log_path+'/train_log'
-    self.test_log=self.log_path+'/test_log'
-    self.train_summary_writer = tf.summary.create_file_writer(self.train_log)
-    self.test_summary_writer = tf.summary.create_file_writer(self.test_log)
-
+  def __init__(self):
+    # hard coded
+    self.optimizer=tf.keras.optimizers.SGD
+    self.lossfunction=tf.keras.losses.SparseCategoricalCrossentropy()
 
     self.train_loss_metric = tf.keras.metrics.Mean(name='train_loss')
     self.train_accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
     self.test_loss_metric = tf.keras.metrics.Mean(name='test_loss')
     self.test_accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+    # self.trace=True
+    self._global_step = 0
+    self._start_epoch=0
+    self._global_step_reminder = 0
+    self.current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")    
+    self.history={}
 
-    self.hparams=hparams
-    del self.hparams['TRAIN_DS']
-    del self.hparams['TEST_DS']
+
+  def _initialize1_(self):
+    self.lr=self._linear_lr_(train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
+    self.optimizer=self.optimizer(self.lr)
+    self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
+    self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
+
+  def _initialize2_(self):
+      self._log=self.log_path + '/' + self.name + '/' + self.current_time
+      self._train_log=self._log+'/train_log'
+      self._test_log=self._log+'/test_log'
+      self._chosen_model_=self.model()
 
 
+  def _savehistory_(self,epoch):
+    vardict=dict([(i,self.__dict__[i]) for i in self.__dict__.keys() if any(ele in str(type(self.__dict__[i])) for ele in ['int','float'])])
+    if epoch==0:
+      self.history['epoch']=[]
+      
+      for i in vardict.keys():
+        self.history[i]=[]
+    self.history['epoch'].append(epoch+1)
+    for i in vardict.keys():
+      self.history[i].append(vardict[i])
+    
+  def _savelrhistory_(self,iteration,epoch):
+    if epoch==0 and iteration==1:
+      self.history['lr_epoch']=[]
+      self.history['lr_step']=[]
+      self.history['lr']=[]
+
+    self.history['lr_step'].append(iteration)
+    self.history['lr_epoch'].append(epoch+1) 
+    self.history['lr'].append(self.__dict__['optimizer'].lr)
 
   @timer  
-  def call(self):
+  def call(self,train_ds,test_ds):
     tf.keras.backend.set_floatx('float16')
-    test_ds_batches = self.test_ds.ds.shuffle(self.test_ds.length).batch(self.batch_size).prefetch(self.batch_size)
-    # for epoch in range(self.epochs):
-    for epoch in range(self.start_epoch,self.start_epoch+self.epochs):      
+    test_ds_batches = test_ds.ds.shuffle(test_ds.length).batch(self.batch_size).prefetch(self.batch_size)
+    for epoch in range(self._start_epoch,self._start_epoch+self.epochs):   
+      print('epoch',epoch)   
+      if epoch==0:
+        self._initialize2_()
+      if epoch==self._start_epoch:
+        self._initialize1_()
       self.train_loss_metric.reset_states()
       self.train_accuracy_metric.reset_states()
       self.test_loss_metric.reset_states()
@@ -96,57 +102,59 @@ class train(object):
       # if self.trace:
       #   tf.summary.trace_on(graph=True, profiler=False)
 
-      train_ds_batches = self.train_ds.ds.shuffle(self.train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
+      train_ds_batches = train_ds.ds.shuffle(train_ds.length).batch(self.batch_size).prefetch(self.batch_size)
       for x in tqdm(train_ds_batches):
-        self.global_step=self.global_step+1
+        self._global_step=self._global_step+1
         self.optimizer.learning_rate=self.lr
-        with self.train_summary_writer.as_default():    
-          tf.summary.scalar('LR', self.optimizer.lr, step=self.global_step_reminder+self.global_step)
+
+        self._savelrhistory_(self._global_step,epoch)
+        with self._train_summary_writer.as_default():    
+          tf.summary.scalar('LR', self.optimizer.lr, step=self._global_step_reminder+self._global_step)
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        predictions=self.deep_learn(inputs, labels, 'train')
+        predictions=self._deep_learn_(inputs, labels, 'train')
         # if self.trace:
         #   with self.train_summary_writer.as_default():        
         #     tf.summary.trace_export(name='Architecture',step=0)#,profiler_outdir=self.train_log)
         #   tf.summary.trace_off()
         #   self.trace=False
 
-      self.train_mean_loss = self.train_loss_metric.result().numpy()
-      self.train_mean_accuracy = self.train_accuracy_metric.result().numpy()
+      self._train_mean_loss = self.train_loss_metric.result().numpy()
+      self._train_mean_accuracy = self.train_accuracy_metric.result().numpy()
 
       for x in test_ds_batches:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        predictions=self.deep_learn(inputs, labels, 'test')
-      self.test_mean_loss = self.test_loss_metric.result().numpy()
-      self.test_mean_accuracy = self.test_accuracy_metric.result().numpy()
+        predictions=self._deep_learn_(inputs, labels, 'test')
+      self._test_mean_loss = self.test_loss_metric.result().numpy()
+      self._test_mean_accuracy = self.test_accuracy_metric.result().numpy()
 
-      with self.train_summary_writer.as_default():
+      with self._train_summary_writer.as_default():
         # tf.summary.scalar('LR', self.optimizer.lr, step=self.global_step_reminder+self.global_step)
-        tf.summary.scalar('loss', self.train_mean_loss, step=epoch+1)
-        tf.summary.scalar('accuracy', self.train_mean_accuracy, step=epoch+1)
+        tf.summary.scalar('loss', self._train_mean_loss, step=epoch+1)
+        tf.summary.scalar('accuracy', self._train_mean_accuracy, step=epoch+1)
         tf.summary.scalar('epochs', self.epochs, step=epoch+1)
         tf.summary.scalar('batch_size', self.batch_size, step=epoch+1)
 
-      with self.test_summary_writer.as_default():
-        tf.summary.scalar('loss', self.test_mean_loss, step=epoch+1)
-        tf.summary.scalar('accuracy', self.test_mean_accuracy, step=epoch+1)
-
-      print('Epoch: ', epoch+1, 'train loss:    ', self.train_mean_loss, '  train accuracy: ',self.train_mean_accuracy, '  test loss:    ', self.test_mean_loss, '  test accuracy: ',self.test_mean_accuracy)
-    self.start_epoch=epoch+1  
-    self.global_step_reminder=self.global_step
-    self.global_step = 0
+      with self._test_summary_writer.as_default():
+        tf.summary.scalar('loss', self._test_mean_loss, step=epoch+1)
+        tf.summary.scalar('accuracy', self._test_mean_accuracy, step=epoch+1)
+      self._savehistory_(epoch)
+      print('Epoch: ', epoch+1, 'train loss:    ', self._train_mean_loss, '  train accuracy: ',self._train_mean_accuracy, '  test loss:    ', self._test_mean_loss, '  test accuracy: ',self._test_mean_accuracy)
+    self._start_epoch=epoch+1  
+    self._global_step_reminder=self._global_step
+    self._global_step = 0
   
   @tf.function
-  def deep_learn(self,inputs, labels, mode):
+  def _deep_learn_(self,inputs, labels, mode):
     with tf.GradientTape() as tape:
-      predictions = self.model(inputs)
+      predictions = self._chosen_model_(inputs)
       # regularization_loss = tf.math.add_n(model.losses)
       pred_loss = self.lossfunction(labels, predictions)
       total_loss = pred_loss #+ regularization_loss
       if mode=='train':
-        gradients = tape.gradient(total_loss, self.model.trainable_variables)
-        self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
+        gradients = tape.gradient(total_loss, self._chosen_model_.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradients, self._chosen_model_.trainable_variables))
       
     if mode=='train':
       self.train_loss_metric.update_state(total_loss)
@@ -163,16 +171,15 @@ class train(object):
       for x in ds:
         inputs=tf.cast(x['features'],tf.float16)
         labels=tf.cast(x['lables'],tf.int32)
-        lst_predictions1.extend(list(self.deep_learn(inputs, labels, 'test').numpy()))
+        lst_predictions1.extend(list(self._deep_learn_(inputs, labels, 'test').numpy()))
         lst_actuals.extend(list(labels.numpy()))
         lst_predictions=[list(i) for i in lst_predictions1]
       return lst_actuals,lst_predictions
 
 
-
-  def linear_lr(self,datalen,batch_size,epochs,lr_mode,lr_peak,lr_repeat):
-    x = list(range(0,epochs+1,round(epochs*(1/lr_repeat))))
-    x = x + [epochs] if x[-1]!=epochs else x
+  def _linear_lr_(self,datalen,batch_size,epochs,lr_mode,lr_peak,lr_repeat):
+    batches_per_epoch = datalen//batch_size + 1
+    x = [i*batches_per_epoch for i in list(range(0,epochs,lr_repeat))+[list(range(0,epochs,lr_repeat))[-1]+lr_repeat]]
 
     if lr_mode=='stepup':
       z=[i+1 for i in x]
@@ -202,23 +209,24 @@ class train(object):
       y=[lr_peak] * len(x)
 
     lr_schedule = lambda t: np.interp([t], x, y)[0]
-    batches_per_epoch = datalen//batch_size + 1
-
-    lr_func = lambda: lr_schedule(self.global_step/batches_per_epoch)/batch_size
+    lr_func = lambda: lr_schedule(self._global_step)/batch_size
     return lr_func
 
 
-
   def save(self,path):
-    self.model.save(path +'/'+self.name+'.h5')
-    file = open(path +'/'+self.name+'.pkl', 'wb')
-    pickle.dump(self.hparams, file)
+    self._chosen_model_.save(path +'/'+self.name +'/'+self.name+'.h5')
+    file = open(path +'/'+self.name +'/'+self.name+'.pkl', 'wb')
+    save_dict= dict([(i,self.__dict__[i]) for i in self.__dict__.keys() if any(ele in str(type(self.__dict__[i])) for ele in ['int','float','str', 'dict'])])
+    pickle.dump(save_dict, file)
     file.close
+
 
 
   def load(self,path):
-    new_model = tf.keras.models.load_model(path+'/'+self.name+'.h5')
-    file = open(path+'/'+self.name+'.pkl', 'rb')
-    self.hparams=pickle.load(file)
+    self._chosen_model_ = tf.keras.models.load_model(path +'/'+self.name +'/'+self.name+'.h5')
+    file = open(path +'/'+self.name +'/'+self.name+'.pkl', 'rb')
+    hparams=pickle.load(file)
     file.close
-    return new_model,self.hparams
+    for i in hparams.keys():
+      setattr(self, i, hparams[i])
+    
