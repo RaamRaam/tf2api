@@ -51,8 +51,8 @@ class train(object):
     self.history={}
 
 
-  def _initialize1_(self):
-    self.lr=self._linear_lr_(train_ds.length,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
+  def _initialize1_(self,datalen):
+    self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
     self.optimizer=self.optimizer(self.lr)
     self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
     self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
@@ -94,7 +94,7 @@ class train(object):
       if epoch==0:
         self._initialize2_()
       if epoch==self._start_epoch:
-        self._initialize1_()
+        self._initialize1_(train_ds.length)
       self.train_loss_metric.reset_states()
       self.train_accuracy_metric.reset_states()
       self.test_loss_metric.reset_states()
