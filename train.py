@@ -1,4 +1,4 @@
-# from .libraries import *
+from .libraries import *
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPool2D, GlobalMaxPool2D, BatchNormalization
 from tqdm import tqdm_notebook as tqdm
