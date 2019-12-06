@@ -8,10 +8,10 @@ import functools
 import time
 
 from shutil import copyfile
-from google.colab import drive
+# from google.colab import drive
 
 # import libraries
-from .libraries import *
+# from .libraries import *
 # from .globals import *
 from .tfrecords import *
 # from .augment import *

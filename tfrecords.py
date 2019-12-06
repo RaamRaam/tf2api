@@ -8,6 +8,8 @@ import functools
 import time
 import concurrent.futures
 import json
+from copy import deepcopy
+# from itertools import tee
 
 def _int64_feature(value):
   return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
@@ -17,6 +19,7 @@ def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 type_map={'int' : (_int64_feature,tf.int64),'float' : (_float_feature,tf.float32),'str' : (_bytes_feature,tf.string),'list' : (_bytes_feature,tf.string),'numpy.uint8' : (_int64_feature,tf.int64),'numpy.float32' : (_float_feature,tf.float32),'numpy.float64' : (_float_feature,tf.float64),'numpy.ndarray' : (_bytes_feature,tf.string)}
+
 
 @timer
 def SaveTFRecordSet(path,data_dict):
@@ -70,6 +73,7 @@ class ds(object):
     
 
     def __parser(self,record,content_dict,head):
+
         parsed = tf.io.parse_single_example(record, content_dict)
         for (col,coltype) in zip(head[0],head[1]):
             if 'int' in coltype:
@@ -85,9 +89,31 @@ class ds(object):
                 h=parsed[col+'_h']
                 w=parsed[col+'_w']
                 d=parsed[col+'_d']
-                test1=tf.reshape(test, [h,w,d])
+                # test1=tf.reshape(test, [h,w,d])
+                start_iter=True
+                test1=tf.transpose(tf.reshape(test, [h,w,d]), [1, 0, 2])
+
+                for i in range(15):
+                    t1=tf.slice(test1,[i,0,0],[1,4,d])
+                    t2=tf.slice(test1,[i,4,0],[1,4,d])
+                    t3=tf.slice(test1,[i,8,0],[1,4,d])
+                    t4=tf.concat([t1,t2,t3],axis=0)
+                    if start_iter:
+                        t5=t4
+                        start_iter=False
+                    else:
+                        t5=tf.concat([t5,t4],axis=0)
+                # test2=tf.make_ndarray(test1)
+                # B = np.einsum('abc->bac', test2)
+                # for i in range(B.shape[0]):
+                #     C = np.vstack((B[i:i+1,:4,:],B[i:i+1,4:8,:],B[i:i+1,8:,:]))
+                #     if i==0:
+                #         D = C
+                #     else:
+                #         D = K.vstack((D,C))
+
                 del parsed[col]
-                parsed[col]=test1
+                parsed[col]=t5
             elif coltype=='list':
                 test=tf.io.decode_raw(parsed[col], tf.float64)
                 l=parsed[col+'_l']
@@ -110,16 +136,12 @@ class ds(object):
                 content_dict[col+'_l']=tf.io.FixedLenFeature([], tf.int64)
             content_dict[col]=tf.io.FixedLenFeature([], type_map[coltype][1])
         tfds=tf.data.TFRecordDataset(tf.data.Dataset.list_files(tffilelist),num_parallel_reads=parallelize)              
-        # for i in tfds:
-        #   parser(i,content_dict,[header['cols'],header['coltypes']])
-        #   break
         self.ds=tfds.map(lambda record:self.__parser(record,content_dict,[header['cols'],header['coltypes']]),num_parallel_calls=parallelize)
         list_ds=list(self.ds)
         self.length=len(list_ds)
         self.columns=list_ds[0].keys()
         return self
         # return {'ds':ds,'len':len(list_ds), 'keys':list_ds[0].keys()}
-        
     def reproduce(self):
         return ds()
     @timer
@@ -131,4 +153,3 @@ class ds(object):
             new_ds.columns=list_ds[0].keys()
             return new_ds
 
-        

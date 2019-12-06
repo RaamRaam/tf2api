@@ -8,7 +8,7 @@ import functools
 import time
 
 from shutil import copyfile
-from google.colab import drive
+# from google.colab import drive
 
 
 def mount():
