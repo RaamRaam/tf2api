@@ -137,9 +137,16 @@ class ds(object):
             content_dict[col]=tf.io.FixedLenFeature([], type_map[coltype][1])
         tfds=tf.data.TFRecordDataset(tf.data.Dataset.list_files(tffilelist),num_parallel_reads=parallelize)              
         self.ds=tfds.map(lambda record:self.__parser(record,content_dict,[header['cols'],header['coltypes']]),num_parallel_calls=parallelize)
-        list_ds=list(self.ds)
-        self.length=len(list_ds)
-        self.columns=list_ds[0].keys()
+        ctr=0
+        for i in self.ds:
+            if ctr==0:
+                keys=i.keys()
+            ctr=ctr+1
+        self.length=ctr
+        self.columns=keys
+        # list_ds=list(self.ds)
+        # self.length=len(list_ds)
+        # self.columns=list_ds[0].keys()
         return self
         # return {'ds':ds,'len':len(list_ds), 'keys':list_ds[0].keys()}
     def reproduce(self):
@@ -148,8 +155,15 @@ class ds(object):
     def FilterTFRecordSet(self,col,filterlist):
             new_ds=self.reproduce()
             new_ds.ds=self.ds.filter(lambda y: tf.reduce_any(tf.math.equal(int(y[col]),filterlist)))
-            list_ds=list(new_ds.ds)
-            new_ds.length=len(list_ds)
-            new_ds.columns=list_ds[0].keys()
+            ctr=0
+            for i in new_ds.ds:
+                if ctr==0:
+                    keys=i.keys()
+                ctr=ctr+1
+            new_ds.length=ctr
+            new_ds.columns=keys
+            # list_ds=list(new_ds.ds)
+            # new_ds.length=len(list_ds)
+            # new_ds.columns=list_ds[0].keys()
             return new_ds
 
