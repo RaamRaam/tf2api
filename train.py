@@ -54,7 +54,7 @@ class train(object):
   def _initialize1_(self,datalen):
     self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
 #     print(self.lr)
-    self.optimizer=self.optimizer(self.lr)
+#     self.optimizer=self.optimizer(self.lr)
 #     self.optimizer.learning_rate=self.lr
     self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
     self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
