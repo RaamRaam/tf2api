@@ -89,20 +89,23 @@ class ds(object):
                 h=parsed[col+'_h']
                 w=parsed[col+'_w']
                 d=parsed[col+'_d']
-                # test1=tf.reshape(test, [h,w,d])
-                start_iter=True
-                test1=tf.transpose(tf.reshape(test, [h,w,d]), [1, 0, 2])
+                del parsed[col]
+                parsed[col]=tf.reshape(test, [h,w,d])
 
-                for i in range(15):
-                    t1=tf.slice(test1,[i,0,0],[1,4,d])
-                    t2=tf.slice(test1,[i,4,0],[1,4,d])
-                    t3=tf.slice(test1,[i,8,0],[1,4,d])
-                    t4=tf.concat([t1,t2,t3],axis=0)
-                    if start_iter:
-                        t5=t4
-                        start_iter=False
-                    else:
-                        t5=tf.concat([t5,t4],axis=0)
+                # test1=tf.reshape(test, [h,w,d])
+                # start_iter=True
+                # test1=tf.transpose(tf.reshape(test, [h,w,d]), [1, 0, 2])
+
+                # for i in range(15):
+                #     t1=tf.slice(test1,[i,0,0],[1,4,d])
+                #     t2=tf.slice(test1,[i,4,0],[1,4,d])
+                #     t3=tf.slice(test1,[i,8,0],[1,4,d])
+                #     t4=tf.concat([t1,t2,t3],axis=0)
+                #     if start_iter:
+                #         t5=t4
+                #         start_iter=False
+                #     else:
+                #         t5=tf.concat([t5,t4],axis=0)
                 # test2=tf.make_ndarray(test1)
                 # B = np.einsum('abc->bac', test2)
                 # for i in range(B.shape[0]):
@@ -112,8 +115,8 @@ class ds(object):
                 #     else:
                 #         D = K.vstack((D,C))
 
-                del parsed[col]
-                parsed[col]=t5
+                # del parsed[col]
+                # parsed[col]=t5
             elif coltype=='list':
                 test=tf.io.decode_raw(parsed[col], tf.float64)
                 l=parsed[col+'_l']
