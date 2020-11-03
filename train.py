@@ -37,6 +37,7 @@ class train(object):
   def __init__(self):
     # hard coded
     self.optimizer1=tf.keras.optimizers.SGD
+    self.optimizer=tf.keras.optimizers.SGD
     self.lossfunction=tf.keras.losses.SparseCategoricalCrossentropy()
 
     self.train_loss_metric = tf.keras.metrics.Mean(name='train_loss')
