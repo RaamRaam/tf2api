@@ -92,7 +92,7 @@ class train(object):
     tf.keras.backend.set_floatx('float16')
     test_ds_batches = test_ds.ds.shuffle(test_ds.length).batch(self.batch_size).prefetch(self.batch_size)
     for epoch in range(self._start_epoch,self._start_epoch+self.epochs):   
-      print('epoch',epoch)   
+      print('epoch', self._start_epoch ,epoch)   
       if epoch==0:
         self._initialize2_()
       if epoch==self._start_epoch:
