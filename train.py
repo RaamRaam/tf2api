@@ -55,7 +55,7 @@ class train(object):
   def _initialize1_(self,datalen):
     self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
 #     print(self.lr)
-    self.optimizer=self.optimizer1(self.lr)
+    self.optimizer=self.optimizer(self.lr)
 #     self.optimizer.learning_rate=self.lr
     self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
     self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
@@ -149,7 +149,7 @@ class train(object):
     self._global_step_reminder=self._global_step
     self._global_step = 0
   
-#   @tf.function
+  @tf.function
   def _deep_learn_(self,inputs, labels, mode):
     with tf.GradientTape() as tape:
       predictions = self._chosen_model_(inputs)
