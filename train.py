@@ -53,6 +53,7 @@ class train(object):
 
 
   def _initialize1_(self,datalen):
+    self._chosen_model_=self.model()
     self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
 #     print(self.lr)
     self.optimizer=self.optimizer(self.lr)
@@ -150,7 +151,7 @@ class train(object):
     self._global_step_reminder=self._global_step
     self._global_step = 0
   
-#   @tf.function
+  @tf.function
   def _deep_learn_(self,inputs, labels, mode):
     with tf.GradientTape() as tape:
       predictions = self._chosen_model_(inputs)
