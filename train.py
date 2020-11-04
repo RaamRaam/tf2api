@@ -53,7 +53,7 @@ class train(object):
 
 
   def _initialize1_(self,datalen):
-    self._chosen_model_=self.model()
+    
     self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
 #     print(self.lr)
     self.optimizer=self.optimizer(self.lr)
