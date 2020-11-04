@@ -151,7 +151,7 @@ class train(object):
     self._global_step_reminder=self._global_step
     self._global_step = 0
   
-#   @tf.function
+  @tf.function
   def _deep_learn_(self,inputs, labels, mode):
     with tf.GradientTape() as tape:
       predictions = self._chosen_model_(inputs)
