@@ -44,6 +44,7 @@ class train(object):
     self.train_accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
     self.test_loss_metric = tf.keras.metrics.Mean(name='test_loss')
     self.test_accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+    self.newly_loaded=True
     # self.trace=True
     self._global_step = 0
     self._start_epoch=0
@@ -53,12 +54,11 @@ class train(object):
 
 
   def _initialize1_(self,datalen):
-    
-    self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
-#     print(self.lr)
-    self.optimizer=self.optimizer(learning_rate=self.lr)
-#     self.optimizer=tf.keras.optimizers.SGD(self.lr)
-#     self.optimizer.learning_rate=self.lr
+    if self.newly_loaded:
+      self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
+      self.optimizer=self.optimizer(learning_rate=self.lr)
+      self.newly_loaded=False
+      
     self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
     self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
 
@@ -231,6 +231,7 @@ class train(object):
 
   def load(self,path):
     self._chosen_model_ = tf.keras.models.load_model(path +'/'+self.name +'/'+self.name+'.h5')
+    self.newly_loaded=True
     file = open(path +'/'+self.name +'/'+self.name+'.pkl', 'rb')
     hparams=pickle.load(file)
     file.close
