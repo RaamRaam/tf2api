@@ -62,7 +62,7 @@ class train(object):
     self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
     self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
 
-  def _initialize2_(self):
+  def _initialize2_(self,datalen):
       self._log=self.log_path + '/' + self.name + '/' + self.current_time
       self._train_log=self._log+'/train_log'
       self._test_log=self._log+'/test_log'
@@ -99,7 +99,7 @@ class train(object):
     for epoch in range(self._start_epoch,self._start_epoch+self.epochs):   
       print('epoch', self._start_epoch ,epoch)   
       if epoch==0:
-        self._initialize2_()
+        self._initialize2_(train_ds.length)
       if epoch==self._start_epoch:
         self._initialize1_(train_ds.length)
       self.train_loss_metric.reset_states()
