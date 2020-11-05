@@ -17,10 +17,11 @@ https://www.tensorflow.org/tutorials/quickstart/advanced
 * _git clone https://github.com/RaamRaam/tf2api.git_
 * Open example4execute.ipynb in Jupyter notebook
 
-# Source Files
+# Source Files and functionalities
 * __train.py__
   * _train_ class
   * _call_
+  > Trains the model for provided hyper parameters by taking train and test data as input
   * _save_
   * _load_
   * _evaluate_
@@ -33,6 +34,6 @@ https://www.tensorflow.org/tutorials/quickstart/advanced
   
 * __tfrecords.py__
   * _SaveTFRecordSet_
-  * _ds_ object
+  * _ds_ class
     * _ReadTFRecordSet_
     * _FilterTFRecordSet_
