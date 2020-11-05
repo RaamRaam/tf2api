@@ -21,7 +21,7 @@ https://www.tensorflow.org/tutorials/quickstart/advanced
 * __train.py__
   * _train_ class
   * _call_
-   > Trains the model for provided hyper parameters by taking train and test data as input
+   >>> Trains the model for provided hyper parameters by taking train and test data as input
   * _save_
   * _load_
   * _evaluate_
