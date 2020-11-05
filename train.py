@@ -59,8 +59,8 @@ class train(object):
       self.optimizer=self.optimizer(learning_rate=self.lr)
       self.newly_loaded=False
       
-    self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
-    self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
+      self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
+      self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
 
   def _initialize2_(self):
       self._log=self.log_path + '/' + self.name + '/' + self.current_time
