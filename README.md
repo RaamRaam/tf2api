@@ -21,21 +21,21 @@ https://www.tensorflow.org/tutorials/quickstart/advanced
 * __train.py__
   * _train_ class
   * _call_
-   * Trains the model for provided hyper parameters by taking train and test data as input
+    * Trains the model for provided hyper parameters by taking train and test data as input
   * _save_
-   * Saves the model in the path provided. Expects a folder in the name of model in the object
+    * Saves the model in the path provided. Expects a folder in the name of model in the object
   * _load_
-   * Loads the model from the path provided
+    * Loads the model from the path provided
   * _evaluate_
-   * evaluates the accuracy of the model
+    * evaluates the accuracy of the model
   * *_deep_learn_*
-   * Executes Graph of the model
+    * Executes Graph of the model
   * *_linear_lr_*
-   * Dynamic LR finder depending on inputs
+    * Dynamic LR finder depending on inputs
   * *_savehistory_*
-   * Saves history of the model parameters
+    * Saves history of the model parameters
   * *_savelrhistory_*
-   * Saves LR histor
+    * Saves LR history
   
 * __tfrecords.py__
   * _SaveTFRecordSet_
