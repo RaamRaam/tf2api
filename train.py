@@ -36,7 +36,7 @@ class ConvBN(tf.keras.Model):
 class train(object):
   def __init__(self):
     # hard coded
-    self.optimizer1=tf.keras.optimizers.SGD
+    
     self.optimizer=tf.keras.optimizers.SGD
     self.lossfunction=tf.keras.losses.SparseCategoricalCrossentropy()
 
@@ -62,7 +62,7 @@ class train(object):
     self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
     self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
 
-  def _initialize2_(self,datalen):
+  def _initialize2_(self):
       self._log=self.log_path + '/' + self.name + '/' + self.current_time
       self._train_log=self._log+'/train_log'
       self._test_log=self._log+'/test_log'
@@ -99,7 +99,7 @@ class train(object):
     for epoch in range(self._start_epoch,self._start_epoch+self.epochs):   
       print('epoch' ,epoch+1)   
       if epoch==0:
-        self._initialize2_(train_ds.length)
+        self._initialize2_()
       if epoch==self._start_epoch:
         self._initialize1_(train_ds.length)
       self.train_loss_metric.reset_states()
