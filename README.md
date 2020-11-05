@@ -39,6 +39,9 @@ https://www.tensorflow.org/tutorials/quickstart/advanced
   
 * __tfrecords.py__
   * _SaveTFRecordSet_
+    * Creates TFRecords file with Data 
   * _ds_ class
     * _ReadTFRecordSet_
+      * Reads TF Records from file
     * _FilterTFRecordSet_
+      * Filters TF Records from file
