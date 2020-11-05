@@ -28,13 +28,13 @@ https://www.tensorflow.org/tutorials/quickstart/advanced
     * Loads the model from the path provided
   * _evaluate_
     * evaluates the accuracy of the model
-  * *_deep_learn_*
+  * *\_deep_learn\_*
     * Executes Graph of the model
-  * *_linear_lr_*
+  * *\_linear\_lr\_*
     * Dynamic LR finder depending on inputs
-  * *_savehistory_*
+  * *\_savehistory\_*
     * Saves history of the model parameters
-  * *_savelrhistory_*
+  * *\_savelrhistory\_*
     * Saves LR history
   
 * __tfrecords.py__
