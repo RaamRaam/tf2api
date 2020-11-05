@@ -56,19 +56,18 @@ class train(object):
   def _initialize1_(self,datalen):
     if self.newly_loaded:
       self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
+#       https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Optimizer#callable_learning_rate_2
       self.optimizer=self.optimizer(learning_rate=self.lr)
-      self.newly_loaded=False
-      
       self._train_summary_writer = tf.summary.create_file_writer(self._train_log)
       self._test_summary_writer = tf.summary.create_file_writer(self._test_log)
+      self.newly_loaded=False
 
   def _initialize2_(self):
       self._log=self.log_path + '/' + self.name + '/' + self.current_time
       self._train_log=self._log+'/train_log'
       self._test_log=self._log+'/test_log'
       self._chosen_model_=self.model()
-#       self.lr=self._linear_lr_(datalen,self.batch_size,self.epochs,self.lr_mode,self.lr_peak,self.lr_repeat)
-#       self.optimizer=self.optimizer(learning_rate=self.lr)
+
 
 
   def _savehistory_(self,epoch):
@@ -152,6 +151,7 @@ class train(object):
     self._global_step_reminder=self._global_step
     self._global_step = 0
   
+#   https://www.tensorflow.org/api_docs/python/tf/function
   @tf.function
   def _deep_learn_(self,inputs, labels, mode):
     with tf.GradientTape() as tape:
